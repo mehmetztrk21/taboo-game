@@ -1,4 +1,5 @@
 import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -84,12 +85,15 @@ export default function GamePlayScreen() {
   const [gameEnded, setGameEnded] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [showPauseModal, setShowPauseModal] = useState(false);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [clockSound, setClockSound] = useState<Audio.Sound | null>(null);
+  const [showExitModal, setShowExitModal] = useState(false);
 
   // Create a new state to track team scores across rounds
   const [teamRoundScores, setTeamRoundScores] = useState(() => {
     // Initialize with a history for each team
-    return teams.map((team:any) => {
-      return { 
+    return teams.map((team: any) => {
+      return {
         id: team.id,
         name: team.name,
         roundScores: [] as number[], // Array to track scores for each round
@@ -105,10 +109,10 @@ export default function GamePlayScreen() {
   useEffect(() => {
     // Use portrait orientation
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-    
+
     // Hide status bar
     StatusBar.setHidden(true);
-    
+
     // Handle back button
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       if (isTimerRunning) {
@@ -121,12 +125,33 @@ export default function GamePlayScreen() {
 
     shuffleCards();
 
+    // Load sounds
+    const loadSounds = async () => {
+      try {
+        const { sound: correctSound } = await Audio.Sound.createAsync(
+          require('../../assets/sounds/correct.mp3')
+        );
+        setSound(correctSound);
+      } catch (error) {
+        console.log('Error loading sounds:', error);
+      }
+    };
+
+    loadSounds();
+
     return () => {
       ScreenOrientation.unlockAsync();
       StatusBar.setHidden(false);
       backHandler.remove();
       if (timerAnimation.current) {
         timerAnimation.current.stop();
+      }
+      // Unload sounds
+      if (sound) {
+        sound.unloadAsync();
+      }
+      if (clockSound) {
+        clockSound.unloadAsync();
       }
     };
   }, []);
@@ -136,7 +161,7 @@ export default function GamePlayScreen() {
       const timerId = setTimeout(() => {
         setTimeLeft(prevTime => prevTime - 1);
       }, 1000);
-      
+
       return () => clearTimeout(timerId);
     } else if (isTimerRunning && timeLeft === 0) {
       endRound();
@@ -150,18 +175,18 @@ export default function GamePlayScreen() {
       teams.forEach((team: Team, index: number) => {
         team.score = teamRoundScores[index].totalScore;
       });
-      
+
       // Find the winner
       const maxScore = Math.max(...teams.map((team: Team) => team.score));
-      const winner = teams.find((team: Team) => team.score >= targetScore) || 
-                    teams.find((team: Team) => team.score === maxScore);
-      
+      const winner = teams.find((team: Team) => team.score >= targetScore) ||
+        teams.find((team: Team) => team.score === maxScore);
+
       router.replace({
         pathname: '/game/scoreboard',
         params: {
           teams: JSON.stringify(teams),
           currentRound: currentRound.toString(),
-          roundHistory: JSON.stringify(teamRoundScores.map((t: { roundScores: number[] }) => t.roundScores[currentRound-1] || 0)),
+          roundHistory: JSON.stringify(teamRoundScores.map((t: { roundScores: number[] }) => t.roundScores[currentRound - 1] || 0)),
           teamRoundScores: JSON.stringify(teamRoundScores),
           winnerTeam: JSON.stringify(winner),
           hasWinner: "true",
@@ -171,23 +196,54 @@ export default function GamePlayScreen() {
     }
   }, [gameEnded]);
 
-  const startTimer = () => {
+  const playSound = async (soundFile: any) => {
+    try {
+      const { sound: newSound } = await Audio.Sound.createAsync(soundFile);
+      await newSound.playAsync();
+      newSound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.didJustFinish) {
+          await newSound.unloadAsync();
+        }
+      });
+    } catch (error) {
+      console.log('Error playing sound:', error);
+    }
+  };
+
+  const startTimer = async () => {
     setIsTimerRunning(true);
-    
+
+    // Start clock sound
+    try {
+      const { sound: newClockSound } = await Audio.Sound.createAsync(
+        require('../../assets/sounds/clock.mp3'),
+        { isLooping: true }
+      );
+      setClockSound(newClockSound);
+      await newClockSound.playAsync();
+    } catch (error) {
+      console.log('Error playing clock sound:', error);
+    }
+
     // Animate timer bar
     timerAnimation.current = Animated.timing(timerWidth, {
       toValue: 0,
       duration: timeLeft * 1000,
       useNativeDriver: false,
     });
-    
+
     timerAnimation.current.start();
   };
 
-  const pauseTimer = () => {
+  const pauseTimer = async () => {
     setIsTimerRunning(false);
     if (timerAnimation.current) {
       timerAnimation.current.stop();
+    }
+    if (clockSound) {
+      await clockSound.stopAsync();
+      await clockSound.unloadAsync();
+      setClockSound(null);
     }
   };
 
@@ -214,20 +270,17 @@ export default function GamePlayScreen() {
     setCurrentCardIndex(0);
   };
 
-  const handleCorrect = () => {
+  const handleCorrect = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    await playSound(require('../../assets/sounds/correct.mp3'));
     setRoundScores(prev => ({ ...prev, correct: prev.correct + 1 }));
-    
-    // Update team scores for the UI display only during the round
-    // Actual score update happens at the end of round
     showNextCard();
   };
 
-  const handleIncorrect = () => {
+  const handleIncorrect = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    await playSound(require('../../assets/sounds/wrong2.mp3'));
     setRoundScores(prev => ({ ...prev, incorrect: prev.incorrect + 1 }));
-    
-    // Scores are updated at end of round, not immediately
     showNextCard();
   };
 
@@ -259,53 +312,54 @@ export default function GamePlayScreen() {
     startTimer();
   };
 
-  const endRound = () => {
-    pauseTimer();
-    
+  const endRound = async () => {
+    await pauseTimer();
+
     // Calculate round score
     const roundScore = roundScores.correct - roundScores.incorrect;
-    
+
     // Update round history for the current round summary display
     const updatedRoundHistory = [...roundHistory];
     updatedRoundHistory[currentTeamIndex] = roundScore;
     setRoundHistory(updatedRoundHistory);
-    
+
     // Update the persistent team round scores history
     const updatedTeamRoundScores = [...teamRoundScores];
-    if (!updatedTeamRoundScores[currentTeamIndex].roundScores[currentRound-1]) {
-      updatedTeamRoundScores[currentTeamIndex].roundScores[currentRound-1] = 0;
+    if (!updatedTeamRoundScores[currentTeamIndex].roundScores[currentRound - 1]) {
+      updatedTeamRoundScores[currentTeamIndex].roundScores[currentRound - 1] = 0;
     }
-    updatedTeamRoundScores[currentTeamIndex].roundScores[currentRound-1] += roundScore;
+    updatedTeamRoundScores[currentTeamIndex].roundScores[currentRound - 1] += roundScore;
     updatedTeamRoundScores[currentTeamIndex].totalScore += roundScore;
     setTeamRoundScores(updatedTeamRoundScores);
-    
+
     // Calculate what the new team score will be
     const newTeamScore = updatedTeamRoundScores[currentTeamIndex].totalScore;
-    
+
     // Update the team score object for display
     teams[currentTeamIndex].score = newTeamScore;
-    
+
     // Game ends only if a team reaches the target score at the end of a round
     if (newTeamScore >= targetScore) {
+      await playSound(require('../../assets/sounds/applause.mp3'));
       setGameEnded(true);
     }
-    
+
     setShowRoundSummary(true);
   };
 
   const nextTeam = () => {
     // No need to update score here as it's already done in endRound
-    
+
     const nextTeamIdx = (currentTeamIndex + 1) % teams.length;
     setCurrentTeamIndex(nextTeamIdx);
-    
+
     // If we've gone through all teams, increment the round
     if (nextTeamIdx === 0) {
       setCurrentRound(prev => prev + 1);
     }
-    
+
     setShowRoundSummary(false);
-    
+
     // Reset the current team's round scores for their next turn
     setRoundScores({ correct: 0, incorrect: 0 });
   };
@@ -328,20 +382,21 @@ export default function GamePlayScreen() {
   const winners = [...teams].sort((a: Team, b: Team) => b.score - a.score).filter((team: Team, _, arr) => team.score === arr[0].score);
 
   const handleExitConfirmation = () => {
-    pauseTimer();
-    Alert.alert(
-      'Oyundan Çık',
-      'Oyundan çıkmak istediğinize emin misiniz?',
-      [
-        { text: 'İptal', onPress: () => isTimerRunning && startTimer(), style: 'cancel' },
-        { text: 'Çık', onPress: () => router.replace('/game') }
-      ]
-    );
+    const handleExitConfirmation = () => {
+      pauseTimer();
+      Alert.alert(
+        'Oyundan Çık',
+        'Oyundan çıkmak istediğinize emin misiniz?',
+        [
+          { text: 'İptal', onPress: () => isTimerRunning && startTimer(), style: 'cancel' },
+          { text: 'Çık', onPress: () => router.replace('/game') }
+        ]
+      );
+    };
   };
 
   const renderCurrentCard = () => {
     if (gameCards.length === 0) return null;
-    
     const card = gameCards[currentCardIndex];
 
     return (
@@ -349,16 +404,16 @@ export default function GamePlayScreen() {
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>{card.word}</Text>
           <Text style={styles.scoreText}>{
-              roundScores.correct - roundScores.incorrect
-            }</Text>
+            roundScores.correct - roundScores.incorrect
+          }</Text>
         </View>
-        
+
         <View style={styles.cardContent}>
           {card.tabooWords.map((word, index) => (
             <Text key={index} style={styles.tabooWord}>{word}</Text>
           ))}
         </View>
-        
+
         <View style={styles.teamIndicator}>
           <Text style={styles.teamIndicatorName}>{teams[currentTeamIndex].name}</Text>
           <Text style={styles.passText}>{passesLeft}/{passesPerRound} pas</Text>
@@ -370,78 +425,78 @@ export default function GamePlayScreen() {
   const renderRoundSummary = () => {
     const roundScore = roundScores.correct - roundScores.incorrect;
     const currentTeam = teams[currentTeamIndex];
-    
+
     return (
       <View style={styles.summaryContainer}>
         <View style={styles.summaryHeader}>
           <Text style={styles.summaryTitle}>Tur Sonucu</Text>
         </View>
-        
+
         <View style={styles.summaryContent}>
           <View style={styles.summaryTeam}>
             <Text style={styles.summaryTeamName}>{currentTeam.name}</Text>
             <Text style={styles.summaryTeamScore}>
-              {roundScore > 0 
-                ? `+${roundScore}` 
+              {roundScore > 0
+                ? `+${roundScore}`
                 : roundScore}
               {' puan'}
             </Text>
           </View>
-          
+
           <View style={styles.summaryStats}>
             <View style={styles.statItem}>
               <FontAwesome5 name="check" size={20} color="#2ecc71" />
               <Text style={styles.statValue}>{roundScores.correct}</Text>
               <Text style={styles.statLabel}>Doğru (+1)</Text>
             </View>
-            
+
             <View style={styles.statItem}>
               <FontAwesome5 name="times" size={20} color="#e74c3c" />
               <Text style={styles.statValue}>{roundScores.incorrect}</Text>
               <Text style={styles.statLabel}>Yanlış (-1)</Text>
             </View>
-            
+
             <View style={styles.statItem}>
               <FontAwesome5 name="forward" size={20} color="#3498db" />
               <Text style={styles.statValue}>{passesPerRound - passesLeft}</Text>
               <Text style={styles.statLabel}>Pas</Text>
             </View>
           </View>
-          
+
           {/* Team points table */}
           <View style={styles.teamsSection}>
             <Text style={styles.sectionTitle}>Takım Puanları</Text>
-            
+
             <View style={styles.tableHeader}>
               <Text style={styles.tableHeaderTeam}>Takım</Text>
               <Text style={styles.tableHeaderRound}>Geçmiş Turlar</Text>
               <Text style={styles.tableHeaderRound}>Bu Tur</Text>
               <Text style={styles.tableHeaderTotal}>Toplam</Text>
             </View>
-            
+
             <View style={styles.teamsList}>
               {teams.map((team: Team, index: number) => {
                 // Get the persistent team data
                 const teamData = teamRoundScores[index];
-                
+
                 // For the current team, we're about to add the roundScore, 
                 // but haven't added it yet. For others, use their stored data.
                 const isCurrentTeam = index === currentTeamIndex;
-                
+
                 // Calculate previous rounds total (exclude current round)
                 const pastRoundsTotal = teamData.roundScores
-                  .slice(0, currentRound-1) // Get scores up to previous round
+                  .slice(0, currentRound - 1) // Get scores up to previous round
                   .reduce((sum: number, score: number) => sum + (score || 0), 0);
-                
+
                 // Current round score (so far) for non-current teams or 
                 // the pending round score for current team
-                const thisRoundScore = isCurrentTeam 
-                  ? roundScore 
-                  : (teamData.roundScores[currentRound-1] || 0);
-                
+                const thisRoundScore = isCurrentTeam
+                  ? roundScore
+                  : (teamData.roundScores[currentRound - 1] || 0);
+
                 // Total score is past rounds + current round
                 const totalScore = pastRoundsTotal + thisRoundScore;
-                
+
                 return (
                   <View key={team.id} style={[
                     styles.teamRow,
@@ -454,7 +509,7 @@ export default function GamePlayScreen() {
                     <Text style={[
                       styles.teamRoundScore,
                       thisRoundScore > 0 ? styles.positiveScore :
-                      thisRoundScore < 0 ? styles.negativeScore : {}
+                        thisRoundScore < 0 ? styles.negativeScore : {}
                     ]}>
                       {thisRoundScore > 0 ? `+${thisRoundScore}` : thisRoundScore || '0'}
                     </Text>
@@ -467,8 +522,8 @@ export default function GamePlayScreen() {
             </View>
           </View>
         </View>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.nextButton}
           onPress={() => {
             nextTeam();
@@ -497,17 +552,17 @@ export default function GamePlayScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Oyun Duraklatıldı</Text>
-            
-            <TouchableOpacity 
-              style={[styles.modalButton, styles.continueButton]} 
+
+            <TouchableOpacity
+              style={[styles.modalButton, styles.continueButton]}
               onPress={handleContinue}
             >
               <Text style={styles.modalButtonText}>Devam Et</Text>
               <FontAwesome5 name="play" size={16} color="#fff" />
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.modalButton, styles.endGameButton]} 
+
+            <TouchableOpacity
+              style={[styles.modalButton, styles.endGameButton]}
               onPress={handleEndGame}
             >
               <Text style={styles.modalButtonText}>Oyunu Bitir</Text>
@@ -526,36 +581,36 @@ export default function GamePlayScreen() {
   return (
     <View style={styles.container}>
       {renderPauseModal()}
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.exitButton} 
+        <TouchableOpacity
+          style={styles.exitButton}
           onPress={handleExitConfirmation}
         >
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        
+
         <View style={styles.roundInfo}>
           <Text style={styles.roundText}>Tur: {currentRound}</Text>
           <Text style={styles.targetScoreText}>Hedef: {targetScore}</Text>
         </View>
-        
+
         <View style={styles.headerButtons}>
           {isTimerRunning && (
-            <TouchableOpacity 
-              style={styles.pauseButton} 
+            <TouchableOpacity
+              style={styles.pauseButton}
               onPress={handlePause}
             >
               <MaterialIcons name="pause" size={24} color="#fff" />
             </TouchableOpacity>
           )}
-          
+
           <View style={styles.timerContainer}>
-            <Animated.View 
+            <Animated.View
               style={[
-                styles.timerBar, 
-                { 
+                styles.timerBar,
+                {
                   width: timerWidth.interpolate({
                     inputRange: [0, 1],
                     outputRange: ['0%', '100%']
@@ -565,7 +620,7 @@ export default function GamePlayScreen() {
                     outputRange: ['#e74c3c', '#f39c12', '#2ecc71']
                   })
                 }
-              ]} 
+              ]}
             />
             <Text style={styles.timerText}>{timeLeft}</Text>
           </View>
@@ -577,31 +632,31 @@ export default function GamePlayScreen() {
         {isTimerRunning ? (
           <>
             {renderCurrentCard()}
-            
+
             <View style={styles.actionButtons}>
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.incorrectButton]} 
+              <TouchableOpacity
+                style={[styles.actionButton, styles.incorrectButton]}
                 onPress={handleIncorrect}
               >
                 <Text style={styles.actionButtonText}>YANLIŞ</Text>
                 <Text style={styles.pointsText}>-1</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={[
-                  styles.actionButton, 
+                  styles.actionButton,
                   styles.passButton,
                   passesLeft === 0 && styles.disabledButton
-                ]} 
+                ]}
                 onPress={handlePass}
                 disabled={passesLeft === 0}
               >
                 <Text style={styles.actionButtonText}>PAS</Text>
                 <Text style={styles.passCount}>{passesLeft}</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.correctButton]} 
+
+              <TouchableOpacity
+                style={[styles.actionButton, styles.correctButton]}
                 onPress={handleCorrect}
               >
                 <Text style={styles.actionButtonText}>DOĞRU</Text>
@@ -613,9 +668,9 @@ export default function GamePlayScreen() {
           <View style={styles.startRoundContainer}>
             <Text style={styles.startRoundTitle}>Sıradaki Takım</Text>
             <Text style={styles.startRoundTeam}>{teams[currentTeamIndex].name}</Text>
-            
-            <TouchableOpacity 
-              style={styles.startRoundButton} 
+
+            <TouchableOpacity
+              style={styles.startRoundButton}
               onPress={startRound}
             >
               <Text style={styles.startRoundButtonText}>BAŞLA</Text>
@@ -628,38 +683,38 @@ export default function GamePlayScreen() {
       {/* Team Scores */}
       <View style={styles.scoresContainer}>
         {teamRoundScores.map((team: any, index: number) => (
-          <View 
-            key={team.id} 
+          <View
+            key={team.id}
             style={[
               styles.teamScore,
               currentTeamIndex === index && styles.activeTeam
             ]}
           >
-            <Text 
+            <Text
               style={[
-                styles.teamScoreName, 
+                styles.teamScoreName,
                 currentTeamIndex === index && styles.activeTeamText
               ]}
             >
               {team.name}
             </Text>
-            <Text 
+            <Text
               style={[
-                styles.teamScoreValue, 
+                styles.teamScoreValue,
                 currentTeamIndex === index && styles.activeTeamText
               ]}
             >
               {team.totalScore || 0}
             </Text>
-            <Text 
+            <Text
               style={[
-                styles.teamRoundScore, 
+                styles.teamRoundScore,
                 roundHistory[index] > 0 ? styles.positiveScore : roundHistory[index] < 0 ? styles.negativeScore : {},
                 currentTeamIndex === index && styles.activeTeamText
               ]}
             >
-              {roundHistory[index] > 0 ? `+${roundHistory[index]}` : 
-               roundHistory[index] < 0 ? roundHistory[index] : '0'}
+              {roundHistory[index] > 0 ? `+${roundHistory[index]}` :
+                roundHistory[index] < 0 ? roundHistory[index] : '0'}
             </Text>
           </View>
         ))}
@@ -1105,5 +1160,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#3498db',
     textAlign: 'right',
-  },
+  }
 }); 

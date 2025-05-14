@@ -22,6 +22,7 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           animation: 'slide_from_right',
+          headerShown:false
         }}
       >
         <Stack.Screen name="index" options={{ 
