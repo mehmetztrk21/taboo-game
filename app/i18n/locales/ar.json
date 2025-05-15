@@ -1,0 +1,80 @@
+{
+  "general": {
+    "appName": "تابو",
+    "loading": "جار التحميل...",
+    "error": "حدث خطأ!",
+    "retry": "إعادة المحاولة",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "ok": "موافق",
+    "yes": "نعم",
+    "no": "لا"
+  },
+  "home": {
+    "title": "لعبة كلمات ممتعة مع أصدقائك!",
+    "newGame": "لعبة جديدة",
+    "settings": "الإعدادات",
+    "howToPlay": "كيف تلعب؟",
+    "about": "حول",
+    "exit": "خروج"
+  },
+  "game": {
+    "round": "جولة",
+    "targetScore": "النقاط المستهدفة",
+    "timeLeft": "الوقت المتبقي",
+    "points": "نقاط",
+    "pass": "تمرير",
+    "correct": "صحيح",
+    "incorrect": "خطأ",
+    "startTurn": "ابدأ",
+    "nextTeam": "الفريق التالي",
+    "roundResult": "نتيجة الجولة",
+    "teamScores": "نقاط الفريق",
+    "team": "فريق",
+    "pastRounds": "الجولات السابقة",
+    "thisRound": "هذه الجولة",
+    "total": "المجموع",
+    "pause": "إيقاف مؤقت",
+    "resume": "استئناف",
+    "endGame": "إنهاء اللعبة",
+    "exitConfirm": "هل أنت متأكد أنك تريد الخروج من اللعبة؟",
+    "gameOver": "انتهت اللعبة"
+  },
+  "settings": {
+    "language": "اللغة",
+    "turkish": "التركية",
+    "english": "الإنجليزية",
+    "arabic": "العربية",
+    "sound": "الصوت",
+    "haptics": "الاهتزاز",
+    "darkMode": "الوضع المظلم",
+    "resetSettings": "إعادة ضبط الإعدادات"
+  },
+  "setup": {
+    "teamSetup": "إعداد الفريق",
+    "addTeam": "إضافة فريق",
+    "teamName": "اسم الفريق",
+    "gameSettings": "إعدادات اللعبة",
+    "timePerRound": "الوقت لكل جولة",
+    "targetScore": "النقاط المستهدفة",
+    "passesPerRound": "التمريرات لكل جولة",
+    "start": "بدء اللعبة",
+    "seconds": "ثواني"
+  },
+  "scoreboard": {
+    "title": "نتائج اللعبة",
+    "highestScore": "أعلى نتيجة",
+    "winner": "الفائز",
+    "target": "الهدف",
+    "teamScores": "نقاط الفريق",
+    "team": "فريق",
+    "past": "السابق",
+    "thisTurn": "هذه الجولة",
+    "total": "المجموع",
+    "newGame": "لعبة جديدة",
+    "congratulations": "تهانينا!",
+    "showResults": "عرض النتائج"
+  }
+}

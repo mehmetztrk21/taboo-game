@@ -1,4 +1,5 @@
 import { FontAwesome5 } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import React, { useEffect, useState } from 'react';
@@ -32,6 +33,7 @@ export default function ScoreboardScreen() {
   const targetScore = parseInt(params.targetScore as string || '30', 10);
   
   const [showCongrats, setShowCongrats] = useState(hasWinner);
+  const [applauseSound, setApplauseSound] = useState<Audio.Sound | null>(null);
 
   // Sort teams by score (highest first)
   const sortedTeams = [...teams].sort((a, b) => b.score - a.score);
@@ -46,13 +48,51 @@ export default function ScoreboardScreen() {
     // Hide status bar
     StatusBar.setHidden(true);
     
+    // Attempt to find and stop any playing applause sound
+    const loadSound = async () => {
+      try {
+        const { sound } = await Audio.Sound.createAsync(
+          require('../../assets/sounds/applause.mp3'),
+          { shouldPlay: false } // Don't play it again, just get a reference
+        );
+        setApplauseSound(sound);
+      } catch (error) {
+        console.log('Error loading sound:', error);
+      }
+    };
+    
+    loadSound();
+    
+    // Global Audio handler to stop background sounds from play.tsx
+    Audio.setAudioModeAsync({
+      playsInSilentModeIOS: false,
+      staysActiveInBackground: false,
+    });
+    
     return () => {
       ScreenOrientation.unlockAsync();
       StatusBar.setHidden(false);
+      
+      // Clean up sound
+      if (applauseSound) {
+        applauseSound.stopAsync().catch(() => {});
+        applauseSound.unloadAsync().catch(() => {});
+      }
     };
   }, []);
 
   const handleNewGame = () => {
+    // Stop the applause sound if it's playing
+    if (applauseSound) {
+      applauseSound.stopAsync().catch(() => {});
+      applauseSound.unloadAsync().catch(() => {});
+    }
+    
+    // Also disable and re-enable audio as a fallback
+    Audio.setIsEnabledAsync(false).then(() => {
+      Audio.setIsEnabledAsync(true);
+    });
+    
     router.replace('/game');
   };
 
@@ -203,6 +243,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 20,
+    marginTop: 15,
   },
   headerTitle: {
     fontSize: 32,
@@ -359,6 +400,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 10,
     marginTop: 20,
+    marginBottom: 20,
   },
   newGameButtonText: {
     fontSize: 18,

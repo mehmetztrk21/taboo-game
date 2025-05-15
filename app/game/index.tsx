@@ -1,4 +1,4 @@
-import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
@@ -64,6 +64,10 @@ export default function GameSetupScreen() {
     });
   };
 
+  const goToHome = () => {
+    router.push('/');
+  };
+
   return (
     <>
     {/* <Stack.Screen options={{
@@ -74,9 +78,18 @@ export default function GameSetupScreen() {
     <View style={styles.container}>
       <StatusBar style="auto" />
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>TABU</Text>
-          <MaterialCommunityIcons name="cards-outline" size={32} color="#e67e22" />
+        <View style={styles.headerContainer}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={goToHome}
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <View style={styles.header}>
+            <Text style={styles.title}>TABU</Text>
+            <MaterialCommunityIcons name="cards-outline" size={32} color="#e67e22" />
+          </View>
+          <View style={styles.placeholderButton} />
         </View>
 
         <View style={styles.section}>
@@ -190,12 +203,24 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
   },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 30,
+    marginTop: 15,
+  },
+  backButton: {
+    padding: 8,
+    width: 40,
+  },
+  placeholderButton: {
+    width: 40, // Aynı genişlikte boş alan (simetri için)
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 30,
-    marginTop: 10,
   },
   title: {
     fontSize: 36,

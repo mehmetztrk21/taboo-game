@@ -1,0 +1,80 @@
+{
+  "general": {
+    "appName": "Taboo",
+    "loading": "Loading...",
+    "error": "An error occurred!",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "home": {
+    "title": "A fun word game with your friends!",
+    "newGame": "New Game",
+    "settings": "Settings",
+    "howToPlay": "How to Play?",
+    "about": "About",
+    "exit": "Exit"
+  },
+  "game": {
+    "round": "Round",
+    "targetScore": "Target Score",
+    "timeLeft": "Time Left",
+    "points": "Points",
+    "pass": "Pass",
+    "correct": "CORRECT",
+    "incorrect": "WRONG",
+    "startTurn": "START",
+    "nextTeam": "Next Team",
+    "roundResult": "Round Result",
+    "teamScores": "Team Scores",
+    "team": "Team",
+    "pastRounds": "Past Rounds",
+    "thisRound": "This Round",
+    "total": "Total",
+    "pause": "Pause",
+    "resume": "Resume",
+    "endGame": "End Game",
+    "exitConfirm": "Are you sure you want to exit the game?",
+    "gameOver": "Game Over"
+  },
+  "settings": {
+    "language": "Language",
+    "turkish": "Turkish",
+    "english": "English",
+    "arabic": "Arabic",
+    "sound": "Sound",
+    "haptics": "Haptics",
+    "darkMode": "Dark Mode",
+    "resetSettings": "Reset Settings"
+  },
+  "setup": {
+    "teamSetup": "Team Setup",
+    "addTeam": "Add Team",
+    "teamName": "Team Name",
+    "gameSettings": "Game Settings",
+    "timePerRound": "Time Per Round",
+    "targetScore": "Target Score",
+    "passesPerRound": "Passes Per Round",
+    "start": "Start Game",
+    "seconds": "seconds"
+  },
+  "scoreboard": {
+    "title": "Game Results",
+    "highestScore": "Highest Score",
+    "winner": "WINNER",
+    "target": "Target",
+    "teamScores": "Team Scores",
+    "team": "Team",
+    "past": "Past",
+    "thisTurn": "This Turn",
+    "total": "Total",
+    "newGame": "NEW GAME",
+    "congratulations": "Congratulations!",
+    "showResults": "SHOW RESULTS"
+  }
+} 

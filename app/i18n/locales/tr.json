@@ -1,0 +1,80 @@
+{
+  "general": {
+    "appName": "Taboo",
+    "loading": "Yükleniyor...",
+    "error": "Hata oluştu!",
+    "retry": "Tekrar Dene",
+    "cancel": "İptal",
+    "save": "Kaydet",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "ok": "Tamam",
+    "yes": "Evet",
+    "no": "Hayır"
+  },
+  "home": {
+    "title": "Arkadaşlarınızla eğlenceli bir kelime oyunu!",
+    "newGame": "Yeni Oyun",
+    "settings": "Ayarlar",
+    "howToPlay": "Nasıl Oynanır?",
+    "about": "Hakkında",
+    "exit": "Çıkış"
+  },
+  "game": {
+    "round": "Tur",
+    "targetScore": "Hedef Puan",
+    "timeLeft": "Kalan Süre",
+    "points": "Puan",
+    "pass": "Pas",
+    "correct": "DOĞRU",
+    "incorrect": "YANLIŞ",
+    "startTurn": "BAŞLA",
+    "nextTeam": "Sıradaki Takım",
+    "roundResult": "Tur Sonucu",
+    "teamScores": "Takım Puanları",
+    "team": "Takım",
+    "pastRounds": "Geçmiş Turlar",
+    "thisRound": "Bu Tur",
+    "total": "Toplam",
+    "pause": "Duraklat",
+    "resume": "Devam Et",
+    "endGame": "Oyunu Bitir",
+    "exitConfirm": "Oyundan çıkmak istediğinize emin misiniz?",
+    "gameOver": "Oyun Bitti"
+  },
+  "settings": {
+    "language": "Dil",
+    "turkish": "Türkçe",
+    "english": "İngilizce",
+    "arabic": "Arapça",
+    "sound": "Ses",
+    "haptics": "Titreşim",
+    "darkMode": "Karanlık Mod",
+    "resetSettings": "Ayarları Sıfırla"
+  },
+  "setup": {
+    "teamSetup": "Takım Ayarları",
+    "addTeam": "Takım Ekle",
+    "teamName": "Takım Adı",
+    "gameSettings": "Oyun Ayarları",
+    "timePerRound": "Tur Başına Süre",
+    "targetScore": "Hedef Puan",
+    "passesPerRound": "Tur Başına Pas Hakkı",
+    "start": "Oyunu Başlat",
+    "seconds": "saniye"
+  },
+  "scoreboard": {
+    "title": "Oyun Sonuçları",
+    "highestScore": "En Yüksek Skor",
+    "winner": "KAZANDI",
+    "target": "Hedef",
+    "teamScores": "Takım Puanları",
+    "team": "Takım",
+    "past": "Geçmiş",
+    "thisTurn": "Bu Tur",
+    "total": "Toplam",
+    "newGame": "YENİ OYUN",
+    "congratulations": "Tebrikler!",
+    "showResults": "SONUÇLARI GÖSTER"
+  }
+} 

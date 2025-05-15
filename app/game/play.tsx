@@ -3,60 +3,15 @@ import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, BackHandler, Modal, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Animated, BackHandler, Modal, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import wordService from '../services/wordService';
 
-// Sample data for the game cards
-const GAME_CARDS = [
-  {
-    word: 'Haç',
-    tabooWords: ['Çağla Şikel', 'artı işareti', 'İsa', 'Çarmıh', 'Hristiyanlık'],
-  },
-  {
-    word: 'Yiyecek',
-    tabooWords: ['Kakao', 'Tatlı', 'Bitter', 'Sütlü', 'Çikolata'],
-  },
-  {
-    word: 'Spor',
-    tabooWords: ['Top', 'Kaleci', 'Gol', 'Maç', 'Futbol'],
-  },
-  {
-    word: 'Şehir',
-    tabooWords: ['Boğaz', 'Köprü', 'Galata', 'Türkiye', 'İstanbul'],
-  },
-  {
-    word: 'Teknoloji',
-    tabooWords: ['Klavye', 'Fare', 'Ekran', 'İnternet', 'Bilgisayar'],
-  },
-  {
-    word: 'Hayvan',
-    tabooWords: ['Miyav', 'Köpek', 'Kuyruk', 'Tırmalama', 'Kedi'],
-  },
-  {
-    word: 'Okuma',
-    tabooWords: ['Sayfa', 'Okumak', 'Yazar', 'Roman', 'Kitap'],
-  },
-  {
-    word: 'Tatil',
-    tabooWords: ['Kumsal', 'Dalga', 'Su', 'Mavi', 'Deniz'],
-  },
-  {
-    word: 'İletişim',
-    tabooWords: ['Konuşma', 'Arama', 'Mobil', 'Akıllı', 'Telefon'],
-  },
-  {
-    word: 'Eğlence',
-    tabooWords: ['Film', 'Patlamış Mısır', 'Bilet', 'Salon', 'Sinema'],
-  },
-  {
-    word: 'İtalya',
-    tabooWords: ['İtalyan', 'Peynir', 'Hamur', 'Dilim', 'Pizza'],
-  },
-  {
-    word: 'Su Sporları',
-    tabooWords: ['Havuz', 'Su', 'Deniz', 'Kulaç', 'Yüzme'],
-  },
-];
+// Oyun içinde kullanılan kart tipi
+type GameCardType = {
+  word: string;
+  tabooWords: string[];
+};
 
 export default function GamePlayScreen() {
   const params = useLocalSearchParams();
@@ -72,9 +27,13 @@ export default function GamePlayScreen() {
     score: number;
   };
 
+  // Kelimeleri API'den almak için state
+  const [gameCards, setGameCards] = useState<GameCardType[]>([]);
+  const [isLoadingCards, setIsLoadingCards] = useState(true);
+  const [cardsError, setCardsError] = useState<string | null>(null);
+
   const [currentTeamIndex, setCurrentTeamIndex] = useState(0);
   const [currentRound, setCurrentRound] = useState(1);
-  const [gameCards, setGameCards] = useState([...GAME_CARDS]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(timePerRound);
   const [passesLeft, setPassesLeft] = useState(passesPerRound);
@@ -102,10 +61,6 @@ export default function GamePlayScreen() {
     });
   });
 
-  // Animation values
-  const timerWidth = useRef(new Animated.Value(1)).current;
-  const timerAnimation = useRef<Animated.CompositeAnimation | null>(null);
-
   useEffect(() => {
     // Use portrait orientation
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
@@ -123,7 +78,8 @@ export default function GamePlayScreen() {
       return true;
     });
 
-    shuffleCards();
+    // API'den kelimeleri al
+    fetchWords();
 
     // Load sounds
     const loadSounds = async () => {
@@ -143,9 +99,7 @@ export default function GamePlayScreen() {
       ScreenOrientation.unlockAsync();
       StatusBar.setHidden(false);
       backHandler.remove();
-      if (timerAnimation.current) {
-        timerAnimation.current.stop();
-      }
+
       // Unload sounds
       if (sound) {
         sound.unloadAsync();
@@ -155,6 +109,36 @@ export default function GamePlayScreen() {
       }
     };
   }, []);
+
+  // API'den kelimeleri almak için fonksiyon
+  const fetchWords = async () => {
+    setIsLoadingCards(true);
+    setCardsError(null);
+
+    try {
+      // wordService kullanarak rastgele 100 kelime alınıyor
+      const response = await wordService.getWords({ limit: 100 });
+
+      if (!response || !response.data || !Array.isArray(response.data)) {
+        throw new Error('Geçersiz API yanıtı');
+      }
+
+      // API'den gelen verileri oyun formatına dönüştür
+      const formattedCards: GameCardType[] = response.data || [];
+
+      if (formattedCards.length === 0) {
+        throw new Error('Kelime bulunamadı');
+      }
+
+      setGameCards(formattedCards);
+      shuffleCards(formattedCards);
+    } catch (error) {
+      console.error("Kelimeler alınamadı:", error);
+      setCardsError('Bilinmeyen bir hata oluştu');
+    } finally {
+      setIsLoadingCards(false);
+    }
+  };
 
   useEffect(() => {
     if (isTimerRunning && timeLeft > 0) {
@@ -200,7 +184,7 @@ export default function GamePlayScreen() {
     try {
       const { sound: newSound } = await Audio.Sound.createAsync(soundFile);
       await newSound.playAsync();
-      newSound.setOnPlaybackStatusUpdate(async (status) => {
+      newSound.setOnPlaybackStatusUpdate(async (status: any) => {
         if (status.didJustFinish) {
           await newSound.unloadAsync();
         }
@@ -224,22 +208,11 @@ export default function GamePlayScreen() {
     } catch (error) {
       console.log('Error playing clock sound:', error);
     }
-
-    // Animate timer bar
-    timerAnimation.current = Animated.timing(timerWidth, {
-      toValue: 0,
-      duration: timeLeft * 1000,
-      useNativeDriver: false,
-    });
-
-    timerAnimation.current.start();
   };
 
   const pauseTimer = async () => {
     setIsTimerRunning(false);
-    if (timerAnimation.current) {
-      timerAnimation.current.stop();
-    }
+
     if (clockSound) {
       await clockSound.stopAsync();
       await clockSound.unloadAsync();
@@ -264,8 +237,8 @@ export default function GamePlayScreen() {
     router.replace('/game');
   };
 
-  const shuffleCards = () => {
-    const shuffled = [...gameCards].sort(() => Math.random() - 0.5);
+  const shuffleCards = (cardsToShuffle = gameCards) => {
+    const shuffled = [...cardsToShuffle].sort(() => Math.random() - 0.5);
     setGameCards(shuffled);
     setCurrentCardIndex(0);
   };
@@ -284,9 +257,10 @@ export default function GamePlayScreen() {
     showNextCard();
   };
 
-  const handlePass = () => {
+  const handlePass = async () => {
     if (passesLeft > 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      await playSound(require('../../assets/sounds/pass.mp3'));
       setPassesLeft(prev => prev - 1);
       showNextCard();
     }
@@ -305,10 +279,31 @@ export default function GamePlayScreen() {
   };
 
   const startRound = () => {
+    // Kelimeler yüklenmediyse veya hata varsa, oyun başlatılamaz
+
+    fetchWords();
+    if (isLoadingCards) {
+      return;
+    }
+
+    // Kelimeler bulunamadı
+    if (gameCards.length === 0) {
+      Alert.alert(
+        "Kelimeler Bulunamadı",
+        "Oyun başlatılamıyor, kelimelere erişilemedi. Tekrar denemek ister misiniz?",
+        [
+          { text: "İptal", style: "cancel" },
+          { text: "Tekrar Dene", onPress: fetchWords }
+        ]
+      );
+      return;
+    }
+
     setTimeLeft(timePerRound);
     setPassesLeft(passesPerRound);
     setRoundScores({ correct: 0, incorrect: 0 });
     shuffleCards();
+
     startTimer();
   };
 
@@ -382,21 +377,55 @@ export default function GamePlayScreen() {
   const winners = [...teams].sort((a: Team, b: Team) => b.score - a.score).filter((team: Team, _, arr) => team.score === arr[0].score);
 
   const handleExitConfirmation = () => {
-    const handleExitConfirmation = () => {
-      pauseTimer();
-      Alert.alert(
-        'Oyundan Çık',
-        'Oyundan çıkmak istediğinize emin misiniz?',
-        [
-          { text: 'İptal', onPress: () => isTimerRunning && startTimer(), style: 'cancel' },
-          { text: 'Çık', onPress: () => router.replace('/game') }
-        ]
-      );
-    };
+    pauseTimer();
+    Alert.alert(
+      'Oyundan Çık',
+      'Oyundan çıkmak istediğinize emin misiniz?',
+      [
+        { text: 'İptal', onPress: () => isTimerRunning && startTimer(), style: 'cancel' },
+        { text: 'Çık', onPress: () => router.replace('/') }
+      ]
+    );
   };
 
   const renderCurrentCard = () => {
-    if (gameCards.length === 0) return null;
+    // Kelimeler yükleniyor durumu
+    if (isLoadingCards) {
+      return (
+        <View style={[styles.cardContainer, styles.loadingContainer]}>
+          <ActivityIndicator size="large" color="#e67e22" />
+          <Text style={styles.loadingText}>Kelimeler yükleniyor...</Text>
+        </View>
+      );
+    }
+
+    // Hata durumu
+    if (cardsError) {
+      return (
+        <View style={[styles.cardContainer, styles.errorContainer]}>
+          <FontAwesome5 name="exclamation-triangle" size={50} color="#e74c3c" />
+          <Text style={styles.errorTitle}>Hata!</Text>
+          <Text style={styles.errorText}>{cardsError}</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={fetchWords}
+          >
+            <Text style={styles.retryButtonText}>Tekrar Dene</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    // Kelime kartı yok durumu
+    if (gameCards.length === 0) {
+      return (
+        <View style={[styles.cardContainer, styles.errorContainer]}>
+          <Text style={styles.errorTitle}>Kelime bulunamadı!</Text>
+        </View>
+      );
+    }
+
+    // Normal görüntüleme
     const card = gameCards[currentCardIndex];
 
     return (
@@ -611,14 +640,12 @@ export default function GamePlayScreen() {
               style={[
                 styles.timerBar,
                 {
-                  width: timerWidth.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0%', '100%']
-                  }),
-                  backgroundColor: timerWidth.interpolate({
-                    inputRange: [0, 0.3, 1],
-                    outputRange: ['#e74c3c', '#f39c12', '#2ecc71']
-                  })
+                  width: `${(timeLeft / timePerRound) * 100}%`,
+                  backgroundColor: timeLeft > timePerRound * 0.6
+                    ? '#2ecc71' // Yeşil (zamanın %60'ından fazla)
+                    : timeLeft > timePerRound * 0.3
+                      ? '#f39c12' // Sarı (zamanın %30-%60 arası)
+                      : '#e74c3c' // Kırmızı (zamanın %30'undan az)
                 }
               ]}
             />
@@ -629,7 +656,24 @@ export default function GamePlayScreen() {
 
       {/* Game Board */}
       <View style={styles.gameBoard}>
-        {isTimerRunning ? (
+        {isLoadingCards ? (
+          <View style={[styles.cardContainer, styles.loadingContainer]}>
+            <ActivityIndicator size="large" color="#e67e22" />
+            <Text style={styles.loadingText}>Kelimeler yükleniyor...</Text>
+          </View>
+        ) : cardsError ? (
+          <View style={[styles.cardContainer, styles.errorContainer]}>
+            <FontAwesome5 name="exclamation-triangle" size={50} color="#e74c3c" />
+            <Text style={styles.errorTitle}>Hata!</Text>
+            <Text style={styles.errorText}>{cardsError}</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={fetchWords}
+            >
+              <Text style={styles.retryButtonText}>Tekrar Dene</Text>
+            </TouchableOpacity>
+          </View>
+        ) : isTimerRunning ? (
           <>
             {renderCurrentCard()}
 
@@ -729,6 +773,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1e272e',
     paddingVertical: 15,
     paddingHorizontal: 15,
+    paddingBottom: 40
   },
   header: {
     flexDirection: 'row',
@@ -736,6 +781,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 15,
     height: 50,
+    marginTop: 15
   },
   exitButton: {
     padding: 8,
@@ -1160,5 +1206,45 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#3498db',
     textAlign: 'right',
-  }
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#2d3436',
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 20
+  },
+  errorContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#2d3436',
+  },
+  errorTitle: {
+    color: '#e74c3c',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    marginTop: 20
+  },
+  errorText: {
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center'
+  },
+  retryButton: {
+    backgroundColor: '#e67e22',
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 10
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 }); 

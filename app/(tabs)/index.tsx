@@ -1,82 +1,129 @@
 import { FontAwesome5 } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import LanguageSelector from '../components/LanguageSelector';
+import { initializeI18n } from '../i18n';
 
-export default function HomeScreen() {
+// Main content component with translations already initialized
+const HomeContent = () => {
+  const { t } = useTranslation();
+  
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.header}>
-        <View style={styles.titleContainer}>
-          <FontAwesome5 name="gamepad" size={32} color="#e67e22" />
-          <Text style={styles.title}>TABU</Text>
-        </View>
-        <Text style={styles.subtitle}>Arkadaşlarınızla eğlenceli bir kelime oyunu!</Text>
-      </View>
-
-      <View style={styles.gameCard}>
-        <View style={styles.gameCardContent}>
-          <Text style={styles.gameCardDescription}>
-            Takımınızla birlikte, tabu kelimeleri kullanmadan ana kelimeyi anlatmaya çalışın.
-            Karşı takımdan önce hedef puana ulaşan kazanır!
-          </Text>
-
-          <TouchableOpacity
-            style={styles.playButton}
-            onPress={() => router.push('/game')}
-          >
-            <Text style={styles.playButtonText}>OYNA</Text>
-            <FontAwesome5 name="play" size={16} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.rulesContainer}>
-        <Text style={styles.sectionTitle}>Nasıl Oynanır?</Text>
-
-        <View style={styles.ruleCard}>
-          <View style={styles.ruleNumberContainer}>
-            <Text style={styles.ruleNumber}>1</Text>
+    <View style={styles.container}>
+      {/* Dil seçici */}
+      <LanguageSelector />
+      
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        <View style={styles.header}>
+          <View style={styles.titleContainer}>
+            <FontAwesome5 name="gamepad" size={32} color="#e67e22" />
+            <Text style={styles.title}>{t('general.appName')}</Text>
           </View>
-          <View style={styles.ruleContent}>
-            <Text style={styles.ruleTitle}>Takımları Oluştur</Text>
-            <Text style={styles.ruleDescription}>
-              En az iki takım oluşturun ve oyun ayarlarını belirleyin
+          <Text style={styles.subtitle}>{t('home.title')}</Text>
+        </View>
+
+        <View style={styles.gameCard}>
+          <View style={styles.gameCardContent}>
+            <Text style={styles.gameCardDescription}>
+              Takımınızla birlikte, tabu kelimeleri kullanmadan ana kelimeyi anlatmaya çalışın.
+              Karşı takımdan önce hedef puana ulaşan kazanır!
             </Text>
+
+            <TouchableOpacity
+              style={styles.playButton}
+              onPress={() => router.push('/game')}
+            >
+              <Text style={styles.playButtonText}>{t('home.newGame')}</Text>
+              <FontAwesome5 name="play" size={16} color="#fff" />
+            </TouchableOpacity>
           </View>
         </View>
 
-        <View style={styles.ruleCard}>
-          <View style={styles.ruleNumberContainer}>
-            <Text style={styles.ruleNumber}>2</Text>
-          </View>
-          <View style={styles.ruleContent}>
-            <Text style={styles.ruleTitle}>Kelimeyi Anlat</Text>
-            <Text style={styles.ruleDescription}>
-              Tabu kelimeleri kullanmadan, kart üzerindeki ana kelimeyi takım arkadaşlarına anlat
-            </Text>
-          </View>
-        </View>
+        <View style={styles.rulesContainer}>
+          <Text style={styles.sectionTitle}>{t('home.howToPlay')}</Text>
 
-        <View style={styles.ruleCard}>
-          <View style={styles.ruleNumberContainer}>
-            <Text style={styles.ruleNumber}>3</Text>
+          <View style={styles.ruleCard}>
+            <View style={styles.ruleNumberContainer}>
+              <Text style={styles.ruleNumber}>1</Text>
+            </View>
+            <View style={styles.ruleContent}>
+              <Text style={styles.ruleTitle}>Takımları Oluştur</Text>
+              <Text style={styles.ruleDescription}>
+                En az iki takım oluşturun ve oyun ayarlarını belirleyin
+              </Text>
+            </View>
           </View>
-          <View style={styles.ruleContent}>
-            <Text style={styles.ruleTitle}>Puan Kazan</Text>
-            <Text style={styles.ruleDescription}>
-              Her doğru tahmin için puan kazanın, hedef puana ilk ulaşan takım oyunu kazanır
-            </Text>
+
+          <View style={styles.ruleCard}>
+            <View style={styles.ruleNumberContainer}>
+              <Text style={styles.ruleNumber}>2</Text>
+            </View>
+            <View style={styles.ruleContent}>
+              <Text style={styles.ruleTitle}>Kelimeyi Anlat</Text>
+              <Text style={styles.ruleDescription}>
+                Tabu kelimeleri kullanmadan, kart üzerindeki ana kelimeyi takım arkadaşlarına anlat
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.ruleCard}>
+            <View style={styles.ruleNumberContainer}>
+              <Text style={styles.ruleNumber}>3</Text>
+            </View>
+            <View style={styles.ruleContent}>
+              <Text style={styles.ruleTitle}>Puan Kazan</Text>
+              <Text style={styles.ruleDescription}>
+                Her doğru tahmin için puan kazanın, hedef puana ilk ulaşan takım oyunu kazanır
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
+};
+
+// Main screen component that handles initialization
+export default function HomeScreen() {
+  const [isI18nInitialized, setIsI18nInitialized] = useState(false);
+  
+  useEffect(() => {
+    // i18n başlatma
+    const setupI18n = async () => {
+      await initializeI18n();
+      setIsI18nInitialized(true);
+    };
+    
+    setupI18n();
+  }, []);
+  
+  // Loading screen
+  if (!isI18nInitialized) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <Text style={styles.loadingText}>Yükleniyor...</Text>
+      </View>
+    );
+  }
+
+  // Render main content once initialized
+  return <HomeContent />;
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1e272e',
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 18,
+    color: '#fff',
   },
   contentContainer: {
     padding: 20,
