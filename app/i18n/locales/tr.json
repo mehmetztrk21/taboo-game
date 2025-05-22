@@ -1,6 +1,6 @@
 {
   "general": {
-    "appName": "Taboo",
+    "appName": "TABU",
     "loading": "Yükleniyor...",
     "error": "Hata oluştu!",
     "retry": "Tekrar Dene",
@@ -10,7 +10,8 @@
     "edit": "Düzenle",
     "ok": "Tamam",
     "yes": "Evet",
-    "no": "Hayır"
+    "no": "Hayır",
+    "add": "Ekle"
   },
   "home": {
     "title": "Arkadaşlarınızla eğlenceli bir kelime oyunu!",
@@ -18,13 +19,20 @@
     "settings": "Ayarlar",
     "howToPlay": "Nasıl Oynanır?",
     "about": "Hakkında",
-    "exit": "Çıkış"
+    "exit": "Çıkış",
+    "gameDescription": "Takımınızla birlikte, tabu kelimeleri kullanmadan ana kelimeyi anlatmaya çalışın. Karşı takımdan önce hedef puana ulaşan kazanır!",
+    "rule1Title": "Takımları Oluştur",
+    "rule1Description": "En az iki takım oluşturun ve oyun ayarlarını belirleyin",
+    "rule2Title": "Kelimeyi Anlat",
+    "rule2Description": "Tabu kelimeleri kullanmadan, kart üzerindeki ana kelimeyi takım arkadaşlarına anlat",
+    "rule3Title": "Puan Kazan",
+    "rule3Description": "Her doğru tahmin için puan kazanın, hedef puana ilk ulaşan takım oyunu kazanır"
   },
   "game": {
     "round": "Tur",
     "targetScore": "Hedef Puan",
     "timeLeft": "Kalan Süre",
-    "points": "Puan",
+    "points": "puan",
     "pass": "Pas",
     "correct": "DOĞRU",
     "incorrect": "YANLIŞ",
@@ -39,8 +47,13 @@
     "pause": "Duraklat",
     "resume": "Devam Et",
     "endGame": "Oyunu Bitir",
-    "exitConfirm": "Oyundan çıkmak istediğinize emin misiniz?",
-    "gameOver": "Oyun Bitti"
+    "exitConfirm": "Oyundan Çıkış",
+    "exitMessage": "Oyundan çıkmak istediğinize emin misiniz?",
+    "gameOver": "Oyun Bitti",
+    "exit": "Çık",
+    "error": "Kelimeler Bulunamadı",
+    "wordsNotFound": "Oyun başlatılamıyor, kelimelere erişilemedi. Tekrar denemek ister misiniz?",
+    "paused": "Oyun Duraklatıldı"
   },
   "settings": {
     "language": "Dil",
@@ -53,15 +66,16 @@
     "resetSettings": "Ayarları Sıfırla"
   },
   "setup": {
-    "teamSetup": "Takım Ayarları",
+    "teamSetup": "Takımlar",
     "addTeam": "Takım Ekle",
-    "teamName": "Takım Adı",
+    "teamName": "Takım adı",
     "gameSettings": "Oyun Ayarları",
-    "timePerRound": "Tur Başına Süre",
+    "timePerRound": "Tur Süresi",
     "targetScore": "Hedef Puan",
-    "passesPerRound": "Tur Başına Pas Hakkı",
-    "start": "Oyunu Başlat",
-    "seconds": "saniye"
+    "passesPerRound": "Pas Hakkı",
+    "start": "OYUNA BAŞLA",
+    "seconds": "saniye",
+    "team": "Takım"
   },
   "scoreboard": {
     "title": "Oyun Sonuçları",
@@ -75,6 +89,9 @@
     "total": "Toplam",
     "newGame": "YENİ OYUN",
     "congratulations": "Tebrikler!",
-    "showResults": "SONUÇLARI GÖSTER"
+    "showResults": "SONUÇLARI GÖSTER",
+    "gameOver": "Oyun Bitti",
+    "playAgain": "Tekrar Oyna",
+    "backToHome": "Ana Sayfa'ya Dön"
   }
 } 

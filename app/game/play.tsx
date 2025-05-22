@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Animated, BackHandler, Modal, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import wordService from '../services/wordService';
 
@@ -14,6 +15,7 @@ type GameCardType = {
 };
 
 export default function GamePlayScreen() {
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
   const teams = JSON.parse(params.teams as string);
   const timePerRound = parseInt(params.timePerRound as string, 10);
@@ -134,7 +136,7 @@ export default function GamePlayScreen() {
       shuffleCards(formattedCards);
     } catch (error) {
       console.error("Kelimeler alınamadı:", error);
-      setCardsError('Bilinmeyen bir hata oluştu');
+      setCardsError(t('general.error'));
     } finally {
       setIsLoadingCards(false);
     }
@@ -289,11 +291,11 @@ export default function GamePlayScreen() {
     // Kelimeler bulunamadı
     if (gameCards.length === 0) {
       Alert.alert(
-        "Kelimeler Bulunamadı",
-        "Oyun başlatılamıyor, kelimelere erişilemedi. Tekrar denemek ister misiniz?",
+        t('game.error'),
+        t('game.wordsNotFound'),
         [
-          { text: "İptal", style: "cancel" },
-          { text: "Tekrar Dene", onPress: fetchWords }
+          { text: t('general.cancel'), style: "cancel" },
+          { text: t('general.retry'), onPress: fetchWords }
         ]
       );
       return;
@@ -379,11 +381,11 @@ export default function GamePlayScreen() {
   const handleExitConfirmation = () => {
     pauseTimer();
     Alert.alert(
-      'Oyundan Çık',
-      'Oyundan çıkmak istediğinize emin misiniz?',
+      t('game.exitConfirm'),
+      t('game.exitMessage'),
       [
-        { text: 'İptal', onPress: () => isTimerRunning && startTimer(), style: 'cancel' },
-        { text: 'Çık', onPress: () => router.replace('/') }
+        { text: t('general.cancel'), onPress: () => isTimerRunning && startTimer(), style: 'cancel' },
+        { text: t('game.exit'), onPress: () => router.replace('/') }
       ]
     );
   };
@@ -394,7 +396,7 @@ export default function GamePlayScreen() {
       return (
         <View style={[styles.cardContainer, styles.loadingContainer]}>
           <ActivityIndicator size="large" color="#e67e22" />
-          <Text style={styles.loadingText}>Kelimeler yükleniyor...</Text>
+          <Text style={styles.loadingText}>{t('general.loading')}</Text>
         </View>
       );
     }
@@ -404,13 +406,13 @@ export default function GamePlayScreen() {
       return (
         <View style={[styles.cardContainer, styles.errorContainer]}>
           <FontAwesome5 name="exclamation-triangle" size={50} color="#e74c3c" />
-          <Text style={styles.errorTitle}>Hata!</Text>
+          <Text style={styles.errorTitle}>{t('general.error')}</Text>
           <Text style={styles.errorText}>{cardsError}</Text>
           <TouchableOpacity
             style={styles.retryButton}
             onPress={fetchWords}
           >
-            <Text style={styles.retryButtonText}>Tekrar Dene</Text>
+            <Text style={styles.retryButtonText}>{t('general.retry')}</Text>
           </TouchableOpacity>
         </View>
       );
@@ -420,7 +422,7 @@ export default function GamePlayScreen() {
     if (gameCards.length === 0) {
       return (
         <View style={[styles.cardContainer, styles.errorContainer]}>
-          <Text style={styles.errorTitle}>Kelime bulunamadı!</Text>
+          <Text style={styles.errorTitle}>{t('game.wordsNotFound')}</Text>
         </View>
       );
     }
@@ -445,7 +447,7 @@ export default function GamePlayScreen() {
 
         <View style={styles.teamIndicator}>
           <Text style={styles.teamIndicatorName}>{teams[currentTeamIndex].name}</Text>
-          <Text style={styles.passText}>{passesLeft}/{passesPerRound} pas</Text>
+          <Text style={styles.passText}>{passesLeft}/{passesPerRound} {t('game.pass')}</Text>
         </View>
       </View>
     );
@@ -458,7 +460,7 @@ export default function GamePlayScreen() {
     return (
       <View style={styles.summaryContainer}>
         <View style={styles.summaryHeader}>
-          <Text style={styles.summaryTitle}>Tur Sonucu</Text>
+          <Text style={styles.summaryTitle}>{t('game.roundResult')}</Text>
         </View>
 
         <View style={styles.summaryContent}>
@@ -468,7 +470,7 @@ export default function GamePlayScreen() {
               {roundScore > 0
                 ? `+${roundScore}`
                 : roundScore}
-              {' puan'}
+              {' ' + t('game.points')}
             </Text>
           </View>
 
@@ -476,31 +478,31 @@ export default function GamePlayScreen() {
             <View style={styles.statItem}>
               <FontAwesome5 name="check" size={20} color="#2ecc71" />
               <Text style={styles.statValue}>{roundScores.correct}</Text>
-              <Text style={styles.statLabel}>Doğru (+1)</Text>
+              <Text style={styles.statLabel}>{t('game.correct')} (+1)</Text>
             </View>
 
             <View style={styles.statItem}>
               <FontAwesome5 name="times" size={20} color="#e74c3c" />
               <Text style={styles.statValue}>{roundScores.incorrect}</Text>
-              <Text style={styles.statLabel}>Yanlış (-1)</Text>
+              <Text style={styles.statLabel}>{t('game.incorrect')} (-1)</Text>
             </View>
 
             <View style={styles.statItem}>
               <FontAwesome5 name="forward" size={20} color="#3498db" />
               <Text style={styles.statValue}>{passesPerRound - passesLeft}</Text>
-              <Text style={styles.statLabel}>Pas</Text>
+              <Text style={styles.statLabel}>{t('game.pass')}</Text>
             </View>
           </View>
 
           {/* Team points table */}
           <View style={styles.teamsSection}>
-            <Text style={styles.sectionTitle}>Takım Puanları</Text>
+            <Text style={styles.sectionTitle}>{t('game.teamScores')}</Text>
 
             <View style={styles.tableHeader}>
-              <Text style={styles.tableHeaderTeam}>Takım</Text>
-              <Text style={styles.tableHeaderRound}>Geçmiş Turlar</Text>
-              <Text style={styles.tableHeaderRound}>Bu Tur</Text>
-              <Text style={styles.tableHeaderTotal}>Toplam</Text>
+              <Text style={styles.tableHeaderTeam}>{t('game.team')}</Text>
+              <Text style={styles.tableHeaderRound}>{t('game.pastRounds')}</Text>
+              <Text style={styles.tableHeaderRound}>{t('game.thisRound')}</Text>
+              <Text style={styles.tableHeaderTotal}>{t('game.total')}</Text>
             </View>
 
             <View style={styles.teamsList}>
@@ -559,7 +561,7 @@ export default function GamePlayScreen() {
           }}
         >
           <Text style={styles.nextButtonText}>
-            {`SIRA ${teams[(currentTeamIndex + 1) % teams.length].name}`}
+            {`${t('game.nextTeam')} ${teams[(currentTeamIndex + 1) % teams.length].name}`}
           </Text>
           <FontAwesome5 name="arrow-right" size={18} color="#fff" />
         </TouchableOpacity>
@@ -580,13 +582,13 @@ export default function GamePlayScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Oyun Duraklatıldı</Text>
+            <Text style={styles.modalTitle}>{t('game.paused')}</Text>
 
             <TouchableOpacity
               style={[styles.modalButton, styles.continueButton]}
               onPress={handleContinue}
             >
-              <Text style={styles.modalButtonText}>Devam Et</Text>
+              <Text style={styles.modalButtonText}>{t('game.resume')}</Text>
               <FontAwesome5 name="play" size={16} color="#fff" />
             </TouchableOpacity>
 
@@ -594,7 +596,7 @@ export default function GamePlayScreen() {
               style={[styles.modalButton, styles.endGameButton]}
               onPress={handleEndGame}
             >
-              <Text style={styles.modalButtonText}>Oyunu Bitir</Text>
+              <Text style={styles.modalButtonText}>{t('game.endGame')}</Text>
               <FontAwesome5 name="times" size={16} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -621,8 +623,8 @@ export default function GamePlayScreen() {
         </TouchableOpacity>
 
         <View style={styles.roundInfo}>
-          <Text style={styles.roundText}>Tur: {currentRound}</Text>
-          <Text style={styles.targetScoreText}>Hedef: {targetScore}</Text>
+          <Text style={styles.roundText}>{t('game.round')}: {currentRound}</Text>
+          <Text style={styles.targetScoreText}>{t('game.targetScore')}: {targetScore}</Text>
         </View>
 
         <View style={styles.headerButtons}>
@@ -659,18 +661,18 @@ export default function GamePlayScreen() {
         {isLoadingCards ? (
           <View style={[styles.cardContainer, styles.loadingContainer]}>
             <ActivityIndicator size="large" color="#e67e22" />
-            <Text style={styles.loadingText}>Kelimeler yükleniyor...</Text>
+            <Text style={styles.loadingText}>{t('general.loading')}</Text>
           </View>
         ) : cardsError ? (
           <View style={[styles.cardContainer, styles.errorContainer]}>
             <FontAwesome5 name="exclamation-triangle" size={50} color="#e74c3c" />
-            <Text style={styles.errorTitle}>Hata!</Text>
+            <Text style={styles.errorTitle}>{t('general.error')}</Text>
             <Text style={styles.errorText}>{cardsError}</Text>
             <TouchableOpacity
               style={styles.retryButton}
               onPress={fetchWords}
             >
-              <Text style={styles.retryButtonText}>Tekrar Dene</Text>
+              <Text style={styles.retryButtonText}>{t('general.retry')}</Text>
             </TouchableOpacity>
           </View>
         ) : isTimerRunning ? (
@@ -682,7 +684,7 @@ export default function GamePlayScreen() {
                 style={[styles.actionButton, styles.incorrectButton]}
                 onPress={handleIncorrect}
               >
-                <Text style={styles.actionButtonText}>YANLIŞ</Text>
+                <Text style={styles.actionButtonText}>{t('game.incorrect')}</Text>
                 <Text style={styles.pointsText}>-1</Text>
               </TouchableOpacity>
 
@@ -695,29 +697,29 @@ export default function GamePlayScreen() {
                 onPress={handlePass}
                 disabled={passesLeft === 0}
               >
-                <Text style={styles.actionButtonText}>PAS</Text>
+                <Text style={styles.actionButtonText}>{t('game.pass')}</Text>
                 <Text style={styles.passCount}>{passesLeft}</Text>
-              </TouchableOpacity>
+              </TouchableOpacity>  
 
               <TouchableOpacity
                 style={[styles.actionButton, styles.correctButton]}
                 onPress={handleCorrect}
               >
-                <Text style={styles.actionButtonText}>DOĞRU</Text>
+                <Text style={styles.actionButtonText}>{t('game.correct')}</Text>
                 <Text style={styles.pointsText}>+1</Text>
               </TouchableOpacity>
             </View>
           </>
         ) : (
           <View style={styles.startRoundContainer}>
-            <Text style={styles.startRoundTitle}>Sıradaki Takım</Text>
+            <Text style={styles.startRoundTitle}>{t('game.nextTeam')}</Text>
             <Text style={styles.startRoundTeam}>{teams[currentTeamIndex].name}</Text>
 
             <TouchableOpacity
               style={styles.startRoundButton}
               onPress={startRound}
             >
-              <Text style={styles.startRoundButtonText}>BAŞLA</Text>
+              <Text style={styles.startRoundButtonText}>{t('game.startTurn')}</Text>
               <FontAwesome5 name="play" size={18} color="#fff" />
             </TouchableOpacity>
           </View>

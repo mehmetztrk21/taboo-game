@@ -3,52 +3,52 @@ import { getLocales } from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// çeviri dosyaları
+// Translation files / Çeviri dosyaları / ملفات الترجمة
 import ar from './locales/ar.json';
 import en from './locales/en.json';
 import tr from './locales/tr.json';
 
-// varsayılan dil kodu alındı
+// Get default language code
 const getDefaultLanguage = () => {
-  // Desteklenen diller
+  // Supported languages
   const supportedLangs = ['tr', 'en', 'ar'];
   
-  // Cihazın dilini al
+  // Get device language
   const deviceLang = getLocales()[0]?.languageCode || 'tr';
   
-  // Desteklenen dil listesini kontrol et
+  // Check against supported languages list
   return supportedLangs.includes(deviceLang) ? deviceLang : 'tr';
 };
 
-// Dil seçimi yükle
+// Load language preference
 const loadStoredLanguage = async () => {
   try {
     const storedLang = await AsyncStorage.getItem('APP_LANGUAGE');
     return storedLang || getDefaultLanguage();
   } catch (error) {
-    console.error('Dil yüklenirken hata:', error);
+    console.error('Error loading language:', error);
     return getDefaultLanguage();
   }
 };
 
-// Seçilen dili sakla
+// Store selected language
 export const storeLanguage = async (langCode: string) => {
   try {
     await AsyncStorage.setItem('APP_LANGUAGE', langCode);
     await i18n.changeLanguage(langCode);
     return true;
   } catch (error) {
-    console.error('Dil saklanırken hata:', error);
+    console.error('Error storing language:', error);
     return false;
   }
 };
 
-// Hangi yönün rtl olduğunu kontrol et (sağdan sola - Arapça için)
+// Check if RTL direction should be used (for Arabic)
 export const isRTL = (langCode: string) => {
   return langCode === 'ar';
 };
 
-// i18n yapılandırması
+// i18n configuration
 const i18nConfig = {
   resources: {
     tr: { translation: tr },
@@ -61,7 +61,7 @@ const i18nConfig = {
   },
 };
 
-// Asenkron olarak başlangıç dilini ayarla
+// Initialize i18n with stored language asynchronously
 export const initializeI18n = async () => {
   const storedLang = await loadStoredLanguage();
   
@@ -77,5 +77,5 @@ export const initializeI18n = async () => {
   return storedLang;
 };
 
-// Hazır i18n nesnesi dışa aktarıldı
+// Export configured i18n object
 export default i18n; 

@@ -27,8 +27,7 @@ const HomeContent = () => {
         <View style={styles.gameCard}>
           <View style={styles.gameCardContent}>
             <Text style={styles.gameCardDescription}>
-              Takımınızla birlikte, tabu kelimeleri kullanmadan ana kelimeyi anlatmaya çalışın.
-              Karşı takımdan önce hedef puana ulaşan kazanır!
+              {t('home.gameDescription')}
             </Text>
 
             <TouchableOpacity
@@ -49,9 +48,9 @@ const HomeContent = () => {
               <Text style={styles.ruleNumber}>1</Text>
             </View>
             <View style={styles.ruleContent}>
-              <Text style={styles.ruleTitle}>Takımları Oluştur</Text>
+              <Text style={styles.ruleTitle}>{t('home.rule1Title')}</Text>
               <Text style={styles.ruleDescription}>
-                En az iki takım oluşturun ve oyun ayarlarını belirleyin
+                {t('home.rule1Description')}
               </Text>
             </View>
           </View>
@@ -61,9 +60,9 @@ const HomeContent = () => {
               <Text style={styles.ruleNumber}>2</Text>
             </View>
             <View style={styles.ruleContent}>
-              <Text style={styles.ruleTitle}>Kelimeyi Anlat</Text>
+              <Text style={styles.ruleTitle}>{t('home.rule2Title')}</Text>
               <Text style={styles.ruleDescription}>
-                Tabu kelimeleri kullanmadan, kart üzerindeki ana kelimeyi takım arkadaşlarına anlat
+                {t('home.rule2Description')}
               </Text>
             </View>
           </View>
@@ -73,9 +72,9 @@ const HomeContent = () => {
               <Text style={styles.ruleNumber}>3</Text>
             </View>
             <View style={styles.ruleContent}>
-              <Text style={styles.ruleTitle}>Puan Kazan</Text>
+              <Text style={styles.ruleTitle}>{t('home.rule3Title')}</Text>
               <Text style={styles.ruleDescription}>
-                Her doğru tahmin için puan kazanın, hedef puana ilk ulaşan takım oyunu kazanır
+                {t('home.rule3Description')}
               </Text>
             </View>
           </View>
@@ -88,6 +87,7 @@ const HomeContent = () => {
 // Main screen component that handles initialization
 export default function HomeScreen() {
   const [isI18nInitialized, setIsI18nInitialized] = useState(false);
+  const { t } = useTranslation();
   
   useEffect(() => {
     // i18n başlatma
@@ -103,7 +103,7 @@ export default function HomeScreen() {
   if (!isI18nInitialized) {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
-        <Text style={styles.loadingText}>Yükleniyor...</Text>
+        <Text style={styles.loadingText}>{t('general.loading')}</Text>
       </View>
     );
   }

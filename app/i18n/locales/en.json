@@ -1,6 +1,6 @@
 {
   "general": {
-    "appName": "Taboo",
+    "appName": "TABOO",
     "loading": "Loading...",
     "error": "An error occurred!",
     "retry": "Retry",
@@ -10,7 +10,8 @@
     "edit": "Edit",
     "ok": "OK",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "add": "Add"
   },
   "home": {
     "title": "A fun word game with your friends!",
@@ -18,16 +19,23 @@
     "settings": "Settings",
     "howToPlay": "How to Play?",
     "about": "About",
-    "exit": "Exit"
+    "exit": "Exit",
+    "gameDescription": "Try to explain the main word without using taboo words with your team. The team that reaches the target score before the opponents wins!",
+    "rule1Title": "Create Teams",
+    "rule1Description": "Create at least two teams and set up game settings",
+    "rule2Title": "Explain the Word",
+    "rule2Description": "Explain the main word on the card to your teammates without using taboo words",
+    "rule3Title": "Earn Points",
+    "rule3Description": "Earn points for each correct guess, the first team to reach the target score wins the game"
   },
   "game": {
     "round": "Round",
     "targetScore": "Target Score",
     "timeLeft": "Time Left",
-    "points": "Points",
+    "points": "points",
     "pass": "Pass",
-    "correct": "CORRECT",
-    "incorrect": "WRONG",
+    "correct": "True",
+    "incorrect": "False",
     "startTurn": "START",
     "nextTeam": "Next Team",
     "roundResult": "Round Result",
@@ -39,8 +47,13 @@
     "pause": "Pause",
     "resume": "Resume",
     "endGame": "End Game",
-    "exitConfirm": "Are you sure you want to exit the game?",
-    "gameOver": "Game Over"
+    "exitConfirm": "Exit Game",
+    "exitMessage": "Are you sure you want to exit the game?",
+    "gameOver": "Game Over",
+    "exit": "Exit",
+    "error": "Words Not Found",
+    "wordsNotFound": "Game cannot be started, words could not be accessed. Would you like to try again?",
+    "paused": "Game Paused"
   },
   "settings": {
     "language": "Language",
@@ -53,15 +66,16 @@
     "resetSettings": "Reset Settings"
   },
   "setup": {
-    "teamSetup": "Team Setup",
+    "teamSetup": "Teams",
     "addTeam": "Add Team",
-    "teamName": "Team Name",
+    "teamName": "Team name",
     "gameSettings": "Game Settings",
     "timePerRound": "Time Per Round",
     "targetScore": "Target Score",
     "passesPerRound": "Passes Per Round",
-    "start": "Start Game",
-    "seconds": "seconds"
+    "start": "START GAME",
+    "seconds": "seconds",
+    "team": "Team"
   },
   "scoreboard": {
     "title": "Game Results",
@@ -75,6 +89,9 @@
     "total": "Total",
     "newGame": "NEW GAME",
     "congratulations": "Congratulations!",
-    "showResults": "SHOW RESULTS"
+    "showResults": "SHOW RESULTS",
+    "gameOver": "Game Over",
+    "playAgain": "Play Again",
+    "backToHome": "Back to Home"
   }
 } 

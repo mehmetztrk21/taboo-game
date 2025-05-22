@@ -3,6 +3,7 @@ import { Audio } from 'expo-av';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 // Define team type
@@ -19,6 +20,7 @@ type TeamRoundData = {
 };
 
 export default function ScoreboardScreen() {
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
   const teams = JSON.parse(params.teams as string) as Team[];
   const currentRound = parseInt(params.currentRound as string, 10);
@@ -142,35 +144,35 @@ export default function ScoreboardScreen() {
       {renderCongratsModal()}
       
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Oyun Sonuçları</Text>
+        <Text style={styles.headerTitle}>{t('scoreboard.title')}</Text>
         {/* <Text style={styles.roundText}>Tur {currentRound}</Text> */}
       </View>
 
       <View style={styles.content}>
         <View style={styles.winnerSection}>
-          <Text style={styles.winnerTitle}>En Yüksek Skor</Text>
+          <Text style={styles.winnerTitle}>{t('scoreboard.highestScore')}</Text>
           <Text style={styles.winnerTeamName}>{sortedTeams[0].name}</Text>
           <View style={styles.scoreRow}>
-            <Text style={styles.winnerScore}>{sortedTeams[0].score} puan</Text>
-            {hasWinner && <Text style={styles.winnerBadge}>KAZANDI</Text>}
+            <Text style={styles.winnerScore}>{sortedTeams[0].score} {t('game.points')}</Text>
+            {hasWinner && <Text style={styles.winnerBadge}>{t('scoreboard.winner')}</Text>}
           </View>
           {hasWinner ? (
             <View style={styles.trophyContainer}>
               <FontAwesome5 name="trophy" size={40} color="#f1c40f" />
             </View>
           ) : (
-            <Text style={styles.targetText}>Hedef: {targetScore} puan</Text>
+            <Text style={styles.targetText}>{t('scoreboard.target')}: {targetScore} {t('game.points')}</Text>
           )}
         </View>
 
         <View style={styles.teamsSection}>
-          <Text style={styles.sectionTitle}>Takım Puanları</Text>
+          <Text style={styles.sectionTitle}>{t('scoreboard.teamScores')}</Text>
           
           <View style={styles.tableHeader}>
-            <Text style={styles.tableHeaderTeam}>Takım</Text>
-            <Text style={styles.tableHeaderRound}>Geçmiş</Text>
-            <Text style={styles.tableHeaderRound}>Bu Tur</Text>
-            <Text style={styles.tableHeaderTotal}>Toplam</Text>
+            <Text style={styles.tableHeaderTeam}>{t('scoreboard.team')}</Text>
+            <Text style={styles.tableHeaderRound}>{t('scoreboard.past')}</Text>
+            <Text style={styles.tableHeaderRound}>{t('scoreboard.thisTurn')}</Text>
+            <Text style={styles.tableHeaderTotal}>{t('scoreboard.total')}</Text>
           </View>
           
           <ScrollView contentContainerStyle={styles.teamsList}>
@@ -180,7 +182,7 @@ export default function ScoreboardScreen() {
       </View>
 
       <TouchableOpacity style={styles.newGameButton} onPress={handleNewGame}>
-        <Text style={styles.newGameButtonText}>YENİ OYUN</Text>
+        <Text style={styles.newGameButtonText}>{t('scoreboard.newGame')}</Text>
         <FontAwesome5 name="redo" size={18} color="#fff" />
       </TouchableOpacity>
     </View>
@@ -198,12 +200,12 @@ export default function ScoreboardScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <FontAwesome5 name="trophy" size={50} color="#f1c40f" style={styles.modalIcon} />
-            <Text style={styles.congratsTitle}>Tebrikler!</Text>
+            <Text style={styles.congratsTitle}>{t('scoreboard.congratulations')}</Text>
             
             {/* Show winner team with correct score */}
             <View style={styles.winnerTeamContainer}>
               <Text style={styles.congratsWinnerName}>{actualWinnerTeam.name}</Text>
-              <Text style={styles.winnerTeamScore}>{actualWinnerTeam.score} puan</Text>
+              <Text style={styles.winnerTeamScore}>{actualWinnerTeam.score} {t('game.points')}</Text>
             </View>
             
             {/* <Text style={styles.targetText}>Hedef: {targetScore} puan</Text> */}
@@ -215,7 +217,7 @@ export default function ScoreboardScreen() {
                 .map((team, index) => (
                   <View key={team.id} style={styles.otherTeamRow}>
                     <Text style={styles.otherTeamName}>{team.name}</Text>
-                    <Text style={styles.otherTeamScore}>{team.score} puan</Text>
+                    <Text style={styles.otherTeamScore}>{team.score} {t('game.points')}</Text>
                   </View>
                 ))}
             </View>
@@ -224,7 +226,7 @@ export default function ScoreboardScreen() {
               style={styles.closeButton} 
               onPress={() => setShowCongrats(false)}
             >
-              <Text style={styles.closeButtonText}>SONUÇLARI GÖSTER</Text>
+              <Text style={styles.closeButtonText}>{t('scoreboard.showResults')}</Text>
               <FontAwesome5 name="arrow-right" size={16} color="#fff" />
             </TouchableOpacity>
           </View>
