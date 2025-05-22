@@ -134,6 +134,7 @@ export default function GamePlayScreen() {
 
       setGameCards(formattedCards);
       shuffleCards(formattedCards);
+      startTimer();
     } catch (error) {
       console.error("Kelimeler alınamadı:", error);
       setCardsError(t('general.error'));
@@ -306,7 +307,6 @@ export default function GamePlayScreen() {
     setRoundScores({ correct: 0, incorrect: 0 });
     shuffleCards();
 
-    startTimer();
   };
 
   const endRound = async () => {
@@ -362,7 +362,7 @@ export default function GamePlayScreen() {
   };
 
   const handleGoToScoreboard = () => {
-    router.replace({
+    router.replace({ 
       pathname: '/game/scoreboard',
       params: {
         teams: JSON.stringify(teams),
