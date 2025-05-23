@@ -205,13 +205,14 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 40,
+    gap: 20,
   },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 30,
-    marginTop: 15,
+    marginBottom: 25,
+    marginTop: 10,
   },
   backButton: {
     padding: 8,
@@ -234,8 +235,7 @@ const styles = StyleSheet.create({
   section: {
     backgroundColor: '#2d3436',
     borderRadius: 15,
-    padding: 15,
-    marginBottom: 20,
+    padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   },
   settingItem: {
     width: '100%',
-    marginBottom: 15,
+    marginBottom: 20,
   },
   settingLabel: {
     color: '#bdc3c7',

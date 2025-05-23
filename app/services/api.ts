@@ -3,7 +3,7 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { getLocales } from 'expo-localization';
 
 // API instance oluşturma
-const baseURL = '';
+const baseURL = 'https://taboo.hellfury.com';
 
 // API için dil desteği (AsyncStorage'dan alınan aktif dil kodu)
 const getLanguage = async (): Promise<string> => {

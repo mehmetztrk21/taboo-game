@@ -773,17 +773,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1e272e',
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    paddingBottom: 40
+    padding: 15,
+    paddingBottom: 25
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 15,
+    marginBottom: 20,
     height: 50,
-    marginTop: 15
+    marginTop: 10
   },
   exitButton: {
     padding: 8,
@@ -838,7 +837,7 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     width: '100%',
-    height: '60%',
+    height: '55%',
     backgroundColor: '#fff',
     borderRadius: 15,
     padding: 20,
@@ -857,9 +856,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   cardTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#2c3e50',
+    flexShrink: 1,
+    marginRight: 10,
   },
   scoreText: {
     fontSize: 24,
@@ -873,11 +874,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   tabooWord: {
-    fontSize: 22,
-    marginVertical: 8,
+    fontSize: 20,
+    marginVertical: 6,
     color: '#e74c3c',
     fontWeight: '600',
     textAlign: 'center',
+    paddingHorizontal: 5,
   },
   teamIndicator: {
     flexDirection: 'row',
@@ -898,12 +900,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    marginTop: 20,
+    marginTop: 25,
+    gap: 8,
+    paddingHorizontal: 5,
   },
   actionButton: {
-    height: 60,
+    height: 55,
     borderRadius: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
@@ -912,7 +916,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
     flex: 1,
-    marginHorizontal: 5,
   },
   incorrectButton: {
     backgroundColor: '#e74c3c',
@@ -931,7 +934,8 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 14,
+    textAlign: 'center',
   },
   pointsText: {
     fontSize: 14,
@@ -955,19 +959,19 @@ const styles = StyleSheet.create({
   },
   scoresContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     marginTop: 15,
     flexWrap: 'wrap',
+    gap: 10,
   },
   teamScore: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#34495e',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 25,
-    marginBottom: 10,
-    minWidth: '45%',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    width: '48%',
     justifyContent: 'space-between',
   },
   activeTeam: {
@@ -976,13 +980,14 @@ const styles = StyleSheet.create({
   teamScoreName: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 12,
+    flexShrink: 1,
   },
   teamScoreValue: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 20,
-    marginHorizontal: 10,
+    fontSize: 16,
+    marginHorizontal: 6,
   },
   teamRoundScore: {
     width: 70,

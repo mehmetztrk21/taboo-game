@@ -241,11 +241,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1e272e',
     padding: 20,
+    paddingTop: 15,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 20,
-    marginTop: 15,
+    marginBottom: 25,
+    marginTop: 10,
   },
   headerTitle: {
     fontSize: 32,
@@ -357,7 +358,7 @@ const styles = StyleSheet.create({
   teamRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
@@ -419,11 +420,12 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: '#2d3436',
     borderRadius: 15,
-    padding: 30,
+    padding: 35,
     alignItems: 'center',
     width: '85%',
     borderWidth: 2,
     borderColor: '#f1c40f',
+    gap: 15,
   },
   modalIcon: {
     marginBottom: 20,

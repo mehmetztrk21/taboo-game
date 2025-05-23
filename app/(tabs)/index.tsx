@@ -1,6 +1,6 @@
 import { FontAwesome5 } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import LanguageSelector from '../components/LanguageSelector';
@@ -89,15 +89,18 @@ export default function HomeScreen() {
   const [isI18nInitialized, setIsI18nInitialized] = useState(false);
   const { t } = useTranslation();
   
-  useEffect(() => {
-    // i18n başlatma
-    const setupI18n = async () => {
+  const initializeTranslations = useCallback(async () => {
+    try {
       await initializeI18n();
       setIsI18nInitialized(true);
-    };
-    
-    setupI18n();
+    } catch (error) {
+      console.error('Failed to initialize i18n:', error);
+    }
   }, []);
+
+  useEffect(() => {
+    initializeTranslations();
+  }, [initializeTranslations]);
   
   // Loading screen
   if (!isI18nInitialized) {

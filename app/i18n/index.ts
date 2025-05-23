@@ -8,6 +8,22 @@ import ar from './locales/ar.json';
 import en from './locales/en.json';
 import tr from './locales/tr.json';
 
+// i18n configuration
+const i18nConfig = {
+  resources: {
+    tr: { translation: tr },
+    en: { translation: en },
+    ar: { translation: ar },
+  },
+  fallbackLng: 'tr',
+  interpolation: {
+    escapeValue: false,
+  },
+};
+
+// Initialize i18n with default configuration first
+i18n.use(initReactI18next).init(i18nConfig);
+
 // Get default language code
 const getDefaultLanguage = () => {
   // Supported languages
@@ -48,34 +64,12 @@ export const isRTL = (langCode: string) => {
   return langCode === 'ar';
 };
 
-// i18n configuration
-const i18nConfig = {
-  resources: {
-    tr: { translation: tr },
-    en: { translation: en },
-    ar: { translation: ar },
-  },
-  fallbackLng: 'tr',
-  interpolation: {
-    escapeValue: false,
-  },
-};
-
 // Initialize i18n with stored language asynchronously
 export const initializeI18n = async () => {
   const storedLang = await loadStoredLanguage();
-  
-  i18n
-    .use(initReactI18next)
-    .init({
-      resources: i18nConfig.resources,
-      fallbackLng: i18nConfig.fallbackLng,
-      interpolation: i18nConfig.interpolation,
-      lng: storedLang
-    });
-    
+  await i18n.changeLanguage(storedLang);
   return storedLang;
 };
 
 // Export configured i18n object
-export default i18n; 
+export default i18n;
