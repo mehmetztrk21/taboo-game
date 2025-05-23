@@ -2,7 +2,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View,Image } from 'react-native';
 import LanguageSelector from '../components/LanguageSelector';
 import { initializeI18n } from '../i18n';
 
@@ -18,7 +18,7 @@ const HomeContent = () => {
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <View style={styles.header}>
           <View style={styles.titleContainer}>
-            <FontAwesome5 name="gamepad" size={32} color="#e67e22" />
+            <Image source={require('../../assets//images/taboo_logo.png')} style={{ width: 40, height: 40 }} />
             <Text style={styles.title}>{t('general.appName')}</Text>
           </View>
           <Text style={styles.subtitle}>{t('home.title')}</Text>

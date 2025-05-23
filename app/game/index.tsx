@@ -1,14 +1,14 @@
-import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dimensions, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function GameSetupScreen() {
   const { t } = useTranslation();
-  
+
   const [teams, setTeams] = useState([
     { id: 1, name: t('setup.team') + ' 1', score: 0 },
     { id: 2, name: t('setup.team') + ' 2', score: 0 },
@@ -35,7 +35,7 @@ export default function GameSetupScreen() {
 
   const addTeam = () => {
     if (newTeamName.trim() === '') return;
-    
+
     setTeams([
       ...teams,
       { id: teams.length + 1, name: newTeamName, score: 0 }
@@ -50,7 +50,7 @@ export default function GameSetupScreen() {
   };
 
   const updateTeamName = (id: number, name: string) => {
-    setTeams(teams.map(team => 
+    setTeams(teams.map(team =>
       team.id === id ? { ...team, name } : team
     ));
   };
@@ -73,125 +73,127 @@ export default function GameSetupScreen() {
 
   return (
     <>
-    {/* <Stack.Screen options={{
+      {/* <Stack.Screen options={{
         title: 'Oyun Ayarları',
         headerBackTitle:'Ana Sayfa'
     }}/> */}
-        
-    <View style={styles.container}>
-      <StatusBar style="auto" />
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.headerContainer}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={goToHome}
-          >
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <View style={styles.header}>
-            <Text style={styles.title}>{t('general.appName')}</Text>
-            <MaterialCommunityIcons name="cards-outline" size={32} color="#e67e22" />
-          </View>
-          <View style={styles.placeholderButton} />
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('setup.teamSetup')}</Text>
-          <View style={styles.teamsList}>
-            {teams.map((team) => (
-              <View key={team.id} style={styles.teamRow}>
-                <TextInput
-                  style={styles.teamInput}
-                  value={team.name}
-                  onChangeText={(text) => updateTeamName(team.id, text)}
-                  placeholder={t('setup.teamName')}
-                />
-                {teams.length > 2 && (
-                  <TouchableOpacity 
-                    style={styles.removeButton} 
-                    onPress={() => removeTeam(team.id)}
-                  >
-                    <FontAwesome5 name="trash" size={18} color="#e74c3c" />
+      <View style={styles.container}>
+        <StatusBar style="auto" />
+        <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.headerContainer}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={goToHome}
+            >
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <View style={styles.header}>
+              <Image source={require('../../assets//images/taboo_logo.png')} style={{ width: 40, height: 40 }} />
+
+              <Text style={styles.title}>{t('general.appName')}</Text>
+              {/* <MaterialCommunityIcons name="cards-outline" size={32} color="#e67e22" /> */}
+            </View>
+            <View style={styles.placeholderButton} />
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('setup.teamSetup')}</Text>
+            <View style={styles.teamsList}>
+              {teams.map((team) => (
+                <View key={team.id} style={styles.teamRow}>
+                  <TextInput
+                    style={styles.teamInput}
+                    value={team.name}
+                    onChangeText={(text) => updateTeamName(team.id, text)}
+                    placeholder={t('setup.teamName')}
+                  />
+                  {teams.length > 2 && (
+                    <TouchableOpacity
+                      style={styles.removeButton}
+                      onPress={() => removeTeam(team.id)}
+                    >
+                      <FontAwesome5 name="trash" size={18} color="#e74c3c" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ))}
+
+              {showAddTeam ? (
+                <View style={styles.teamRow}>
+                  <TextInput
+                    style={styles.teamInput}
+                    value={newTeamName}
+                    onChangeText={setNewTeamName}
+                    placeholder={t('setup.teamName')}
+                    autoFocus
+                  />
+                  <TouchableOpacity style={styles.addConfirmButton} onPress={addTeam}>
+                    <Text style={styles.addConfirmButtonText}>{t('general.add')}</Text>
                   </TouchableOpacity>
-                )}
-              </View>
-            ))}
-            
-            {showAddTeam ? (
-              <View style={styles.teamRow}>
-                <TextInput
-                  style={styles.teamInput}
-                  value={newTeamName}
-                  onChangeText={setNewTeamName}
-                  placeholder={t('setup.teamName')}
-                  autoFocus
-                />
-                <TouchableOpacity style={styles.addConfirmButton} onPress={addTeam}>
-                  <Text style={styles.addConfirmButtonText}>{t('general.add')}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.cancelButton} 
-                  onPress={() => setShowAddTeam(false)}
+                  <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={() => setShowAddTeam(false)}
+                  >
+                    <FontAwesome5 name="times" size={18} color="#7f8c8d" />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={styles.addTeamButton}
+                  onPress={() => setShowAddTeam(true)}
                 >
-                  <FontAwesome5 name="times" size={18} color="#7f8c8d" />
+                  <FontAwesome5 name="plus" size={16} color="#3498db" />
+                  <Text style={styles.addTeamText}>{t('setup.addTeam')}</Text>
                 </TouchableOpacity>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('setup.gameSettings')}</Text>
+
+            <View style={styles.settingsRow}>
+              <View style={styles.settingItem}>
+                <Text style={styles.settingLabel}>{t('setup.timePerRound')} ({t('setup.seconds')})</Text>
+                <TextInput
+                  style={styles.settingInput}
+                  value={timePerRound}
+                  onChangeText={setTimePerRound}
+                  keyboardType="number-pad"
+                />
               </View>
-            ) : (
-              <TouchableOpacity 
-                style={styles.addTeamButton} 
-                onPress={() => setShowAddTeam(true)}
-              >
-                <FontAwesome5 name="plus" size={16} color="#3498db" />
-                <Text style={styles.addTeamText}>{t('setup.addTeam')}</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('setup.gameSettings')}</Text>
-          
-          <View style={styles.settingsRow}>
-            <View style={styles.settingItem}>
-              <Text style={styles.settingLabel}>{t('setup.timePerRound')} ({t('setup.seconds')})</Text>
-              <TextInput
-                style={styles.settingInput}
-                value={timePerRound}
-                onChangeText={setTimePerRound}
-                keyboardType="number-pad"
-              />
-            </View>
-            
-            <View style={styles.settingItem}>
-              <Text style={styles.settingLabel}>{t('setup.targetScore')}</Text>
-              <TextInput
-                style={styles.settingInput}
-                value={targetScore}
-                onChangeText={setTargetScore}
-                keyboardType="number-pad"
-              />
-            </View>
+              <View style={styles.settingItem}>
+                <Text style={styles.settingLabel}>{t('setup.targetScore')}</Text>
+                <TextInput
+                  style={styles.settingInput}
+                  value={targetScore}
+                  onChangeText={setTargetScore}
+                  keyboardType="number-pad"
+                />
+              </View>
 
-            <View style={styles.settingItem}>
-              <Text style={styles.settingLabel}>{t('setup.passesPerRound')}</Text>
-              <TextInput
-                style={styles.settingInput}
-                value={passesPerRound}
-                onChangeText={setPassesPerRound}
-                keyboardType="number-pad"
-              />
+              <View style={styles.settingItem}>
+                <Text style={styles.settingLabel}>{t('setup.passesPerRound')}</Text>
+                <TextInput
+                  style={styles.settingInput}
+                  value={passesPerRound}
+                  onChangeText={setPassesPerRound}
+                  keyboardType="number-pad"
+                />
+              </View>
             </View>
           </View>
-        </View>
 
-        <TouchableOpacity style={styles.startButton} onPress={startGame}>
-          <Text style={styles.startButtonText}>{t('setup.start')}</Text>
-          <FontAwesome5 name="play" size={18} color="#fff" />
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
+          <TouchableOpacity style={styles.startButton} onPress={startGame}>
+            <Text style={styles.startButtonText}>{t('setup.start')}</Text>
+            <FontAwesome5 name="play" size={18} color="#fff" />
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
     </>
-    
+
   );
 }
 
