@@ -94,7 +94,7 @@ const LanguageSelector: React.FC = () => {
                 <Text style={[
                   styles.languageName,
                   currentLang === lang.code && styles.selectedLanguageText
-                ]}>{t(`settings.${lang.code === 'tr' ? 'turkish' : lang.code === 'en' ? 'english' : 'arabic'}`)}</Text>
+                ]}>{t(`${lang.code === 'tr' ? 'Türkçe' : lang.code === 'en' ? 'English' : 'العربية'}`)}</Text>
                 
                 {currentLang === lang.code && (
                   <Text style={styles.checkIcon}>✓</Text>
