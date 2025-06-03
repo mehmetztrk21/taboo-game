@@ -37,7 +37,7 @@
     "correct": "True",
     "incorrect": "False",
     "startTurn": "START",
-    "nextTeam": "Next Team",
+    "nextTeam": "Next: ",
     "roundResult": "Round Result",
     "teamScores": "Team Scores",
     "team": "Team",

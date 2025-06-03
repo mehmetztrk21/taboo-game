@@ -2,7 +2,8 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View,Image } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import LanguageSelector from '../components/LanguageSelector';
 import { initializeI18n } from '../i18n';
 
@@ -11,7 +12,7 @@ const HomeContent = () => {
   const { t } = useTranslation();
   
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
       {/* Dil seçici */}
       <LanguageSelector />
       
@@ -80,7 +81,7 @@ const HomeContent = () => {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -105,9 +106,9 @@ export default function HomeScreen() {
   // Loading screen
   if (!isI18nInitialized) {
     return (
-      <View style={[styles.container, styles.loadingContainer]}>
+      <SafeAreaView style={[styles.container, styles.loadingContainer]}>
         <Text style={styles.loadingText}>{t('general.loading')}</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
-    paddingTop: 60,
+    paddingTop: 20,
     paddingBottom: 40,
   },
   header: {

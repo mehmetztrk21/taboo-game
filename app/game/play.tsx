@@ -6,6 +6,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Animated, BackHandler, Modal, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import wordService from '../services/wordService';
 
 // Oyun içinde kullanılan kart tipi
@@ -102,12 +103,14 @@ export default function GamePlayScreen() {
       StatusBar.setHidden(false);
       backHandler.remove();
 
-      // Unload sounds
+      // Unload sounds - promise zinciri ekleyelim
       if (sound) {
-        sound.unloadAsync();
+        sound.unloadAsync().catch(() => {});
       }
       if (clockSound) {
-        clockSound.unloadAsync();
+        clockSound.stopAsync()
+          .then(() => clockSound.unloadAsync())
+          .catch(() => {});
       }
     };
   }, []);
@@ -202,6 +205,9 @@ export default function GamePlayScreen() {
 
     // Start clock sound
     try {
+      if (clockSound) {
+        await clockSound.unloadAsync();
+      }
       const { sound: newClockSound } = await Audio.Sound.createAsync(
         require('../../assets/sounds/clock.mp3'),
         { isLooping: true }
@@ -216,10 +222,15 @@ export default function GamePlayScreen() {
   const pauseTimer = async () => {
     setIsTimerRunning(false);
 
-    if (clockSound) {
-      await clockSound.stopAsync();
-      await clockSound.unloadAsync();
-      setClockSound(null);
+    // Stop clock sound
+    try {
+      if (clockSound) {
+        await clockSound.stopAsync();
+        await clockSound.unloadAsync();
+        setClockSound(null);
+      }
+    } catch (error) {
+      console.log('Error stopping clock sound:', error);
     }
   };
 
@@ -311,6 +322,17 @@ export default function GamePlayScreen() {
 
   const endRound = async () => {
     await pauseTimer();
+    
+    // İlave kontrol: pauseTimer başarısız olursa, sesi temizlemeye çalışalım
+    if (clockSound) {
+      try {
+        await clockSound.stopAsync();
+        await clockSound.unloadAsync();
+        setClockSound(null);
+      } catch (error) {
+        console.log('Error stopping clock sound in endRound:', error);
+      }
+    }
 
     // Calculate round score
     const roundScore = roundScores.correct - roundScores.incorrect;
@@ -380,12 +402,38 @@ export default function GamePlayScreen() {
 
   const handleExitConfirmation = () => {
     pauseTimer();
+    
+    // İlave kontrol: ses tamamen durmamış olabilir
+    if (clockSound) {
+      try {
+        clockSound.stopAsync().then(() => {
+          clockSound.unloadAsync();
+          setClockSound(null);
+        }).catch(error => {
+          console.log('Error stopping clock sound in exit:', error);
+        });
+      } catch (error) {
+        console.log('Error handling clock sound in exit:', error);
+      }
+    }
+
     Alert.alert(
       t('game.exitConfirm'),
       t('game.exitMessage'),
       [
         { text: t('general.cancel'), onPress: () => isTimerRunning && startTimer(), style: 'cancel' },
-        { text: t('game.exit'), onPress: () => router.replace('/') }
+        { text: t('game.exit'), onPress: () => {
+          // Çıkış yapılırken ses durdurma işlemini tekrar yapalım
+          if (clockSound) {
+            try {
+              clockSound.stopAsync().then(() => {
+                clockSound.unloadAsync();
+                setClockSound(null);
+              }).catch(() => {});
+            } catch (error) {}
+          }
+          router.replace('/');
+        }}
       ]
     );
   };
@@ -458,7 +506,7 @@ export default function GamePlayScreen() {
     const currentTeam = teams[currentTeamIndex];
 
     return (
-      <View style={styles.summaryContainer}>
+      <SafeAreaView style={styles.summaryContainer} edges={['top']}>
         <View style={styles.summaryHeader}>
           <Text style={styles.summaryTitle}>{t('game.roundResult')}</Text>
         </View>
@@ -565,7 +613,7 @@ export default function GamePlayScreen() {
           </Text>
           <FontAwesome5 name="arrow-right" size={18} color="#fff" />
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
     );
   };
 
@@ -610,7 +658,7 @@ export default function GamePlayScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {renderPauseModal()}
 
       {/* Header */}
@@ -765,7 +813,7 @@ export default function GamePlayScreen() {
           </View>
         ))}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

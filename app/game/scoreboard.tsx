@@ -5,6 +5,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Define team type
 type Team = {
@@ -140,7 +141,7 @@ export default function ScoreboardScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
       {renderCongratsModal()}
       
       <View style={styles.header}>
@@ -185,7 +186,7 @@ export default function ScoreboardScreen() {
         <Text style={styles.newGameButtonText}>{t('scoreboard.newGame')}</Text>
         <FontAwesome5 name="redo" size={18} color="#fff" />
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
   
   // Congrats modal with fixed content to display correct winner

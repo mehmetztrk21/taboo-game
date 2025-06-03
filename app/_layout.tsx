@@ -3,6 +3,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -18,30 +19,32 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack
-        screenOptions={{
-          animation: 'slide_from_right',
-          headerShown:false
-        }}
-      >
-        <Stack.Screen name="index" options={{ 
-          title: 'Tabu',
-          headerShown:false
-        }} />
-        <Stack.Screen name="game/index" options={{ 
-          title: 'Oyun Ayarları',
-          headerBackTitle: 'Ana Sayfa',
-          headerShown:false
-        }} />
-        <Stack.Screen name="game/play" options={{ 
-          headerShown: false 
-        }} />
-        <Stack.Screen name="game/scoreboard" options={{ 
-          headerShown: false 
-        }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack
+          screenOptions={{
+            animation: 'slide_from_right',
+            headerShown:false
+          }}
+        >
+          <Stack.Screen name="index" options={{ 
+            title: 'Tabu',
+            headerShown:false
+          }} />
+          <Stack.Screen name="game/index" options={{ 
+            title: 'Oyun Ayarları',
+            headerBackTitle: 'Ana Sayfa',
+            headerShown:false
+          }} />
+          <Stack.Screen name="game/play" options={{ 
+            headerShown: false 
+          }} />
+          <Stack.Screen name="game/scoreboard" options={{ 
+            headerShown: false 
+          }} />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
