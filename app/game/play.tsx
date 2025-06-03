@@ -5,7 +5,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Animated, BackHandler, Dimensions, Modal, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, BackHandler, Modal, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import wordService from '../services/wordService';
 
 // Oyun içinde kullanılan kart tipi
@@ -80,14 +80,6 @@ export default function GamePlayScreen() {
       return true;
     });
 
-    // Global Audio handler to stop background sounds
-    Audio.setAudioModeAsync({
-      playsInSilentModeIOS: false,
-      staysActiveInBackground: false,
-      shouldDuckAndroid: false,
-      playThroughEarpieceAndroid: false
-    });
-
     // API'den kelimeleri al
     fetchWords();
 
@@ -95,8 +87,7 @@ export default function GamePlayScreen() {
     const loadSounds = async () => {
       try {
         const { sound: correctSound } = await Audio.Sound.createAsync(
-          require('../../assets/sounds/correct.mp3'),
-          { shouldPlay: false }
+          require('../../assets/sounds/correct.mp3')
         );
         setSound(correctSound);
       } catch (error) {
@@ -111,18 +102,13 @@ export default function GamePlayScreen() {
       StatusBar.setHidden(false);
       backHandler.remove();
 
-      // Unload all sounds
+      // Unload sounds
       if (sound) {
-        sound.unloadAsync().catch(() => {});
+        sound.unloadAsync();
       }
       if (clockSound) {
-        clockSound.unloadAsync().catch(() => {});
+        clockSound.unloadAsync();
       }
-      
-      // Disable audio completely on unmount
-      Audio.setIsEnabledAsync(false).then(() => {
-        Audio.setIsEnabledAsync(true);
-      });
     };
   }, []);
 
@@ -619,216 +605,176 @@ export default function GamePlayScreen() {
     );
   };
 
-  const renderExitModal = () => {
-    return (
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={showExitModal}
-        onRequestClose={() => {
-          setShowExitModal(false);
-        }}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{t('game.exitConfirm')}</Text>
-
-            <TouchableOpacity
-              style={[styles.modalButton, styles.endGameButton]}
-              onPress={() => {
-                setShowExitModal(false);
-                router.replace('/');
-              }}
-            >
-              <Text style={styles.modalButtonText}>{t('game.exit')}</Text>
-              <FontAwesome5 name="times" size={16} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
-
   if (showRoundSummary) {
     return renderRoundSummary();
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {renderPauseModal()}
-        {renderExitModal()}
+    <View style={styles.container}>
+      {renderPauseModal()}
 
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.exitButton}
-            onPress={handleExitConfirmation}
-          >
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.exitButton}
+          onPress={handleExitConfirmation}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
 
-          <View style={styles.roundInfo}>
-            <Text style={styles.roundText}>{t('game.round')}: {currentRound}</Text>
-            <Text style={styles.targetScoreText}>{t('game.targetScore')}: {targetScore}</Text>
-          </View>
-
-          <View style={styles.headerButtons}>
-            {isTimerRunning && (
-              <TouchableOpacity
-                style={styles.pauseButton}
-                onPress={handlePause}
-              >
-                <MaterialIcons name="pause" size={24} color="#fff" />
-              </TouchableOpacity>
-            )}
-
-            <View style={styles.timerContainer}>
-              <Animated.View
-                style={[
-                  styles.timerBar,
-                  {
-                    width: `${(timeLeft / timePerRound) * 100}%`,
-                    backgroundColor: timeLeft > timePerRound * 0.6
-                      ? '#2ecc71'
-                      : timeLeft > timePerRound * 0.3
-                        ? '#f39c12'
-                        : '#e74c3c'
-                  }
-                ]}
-              />
-              <Text style={styles.timerText}>{timeLeft}</Text>
-            </View>
-          </View>
+        <View style={styles.roundInfo}>
+          <Text style={styles.roundText}>{t('game.round')}: {currentRound}</Text>
+          <Text style={styles.targetScoreText}>{t('game.targetScore')}: {targetScore}</Text>
         </View>
 
-        {/* Game Board */}
-        <View style={styles.gameBoard}>
-          {isLoadingCards ? (
-            <View style={[styles.cardContainer, styles.loadingContainer]}>
-              <ActivityIndicator size="large" color="#e67e22" />
-              <Text style={styles.loadingText}>{t('general.loading')}</Text>
-            </View>
-          ) : cardsError ? (
-            <View style={[styles.cardContainer, styles.errorContainer]}>
-              <FontAwesome5 name="exclamation-triangle" size={50} color="#e74c3c" />
-              <Text style={styles.errorTitle}>{t('general.error')}</Text>
-              <Text style={styles.errorText}>{cardsError}</Text>
-              <TouchableOpacity
-                style={styles.retryButton}
-                onPress={fetchWords}
-              >
-                <Text style={styles.retryButtonText}>{t('general.retry')}</Text>
-              </TouchableOpacity>
-            </View>
-          ) : isTimerRunning ? (
-            <>
-              {renderCurrentCard()}
-
-              <View style={styles.actionButtons}>
-                <TouchableOpacity
-                  style={[styles.actionButton, styles.incorrectButton]}
-                  onPress={handleIncorrect}
-                >
-                  <Text style={styles.actionButtonText}>{t('game.incorrect')}</Text>
-                  <Text style={styles.pointsText}>-1</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.actionButton,
-                    styles.passButton,
-                    passesLeft === 0 && styles.disabledButton
-                  ]}
-                  onPress={handlePass}
-                  disabled={passesLeft === 0}
-                >
-                  <Text style={styles.actionButtonText}>{t('game.pass')}</Text>
-                  <Text style={styles.passCount}>{passesLeft}</Text>
-                </TouchableOpacity>  
-
-                <TouchableOpacity
-                  style={[styles.actionButton, styles.correctButton]}
-                  onPress={handleCorrect}
-                >
-                  <Text style={styles.actionButtonText}>{t('game.correct')}</Text>
-                  <Text style={styles.pointsText}>+1</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          ) : (
-            <View style={styles.startRoundContainer}>
-              <Text style={styles.startRoundTitle}>{t('game.nextTeam')}</Text>
-              <Text style={styles.startRoundTeam}>{teams[currentTeamIndex].name}</Text>
-
-              <TouchableOpacity
-                style={styles.startRoundButton}
-                onPress={startRound}
-              >
-                <Text style={styles.startRoundButtonText}>{t('game.startTurn')}</Text>
-                <FontAwesome5 name="play" size={18} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-
-        {/* Team Scores */}
-        <View style={styles.scoresContainer}>
-          {teamRoundScores.map((team: any, index: number) => (
-            <View
-              key={team.id}
-              style={[
-                styles.teamScore,
-                currentTeamIndex === index && styles.activeTeam
-              ]}
+        <View style={styles.headerButtons}>
+          {isTimerRunning && (
+            <TouchableOpacity
+              style={styles.pauseButton}
+              onPress={handlePause}
             >
-              <Text
-                style={[
-                  styles.teamScoreName,
-                  currentTeamIndex === index && styles.activeTeamText
-                ]}
-              >
-                {team.name}
-              </Text>
-              <Text
-                style={[
-                  styles.teamScoreValue,
-                  currentTeamIndex === index && styles.activeTeamText
-                ]}
-              >
-                {team.totalScore || 0}
-              </Text>
-              <Text
-                style={[
-                  styles.teamRoundScore,
-                  roundHistory[index] > 0 ? styles.positiveScore : roundHistory[index] < 0 ? styles.negativeScore : {},
-                  currentTeamIndex === index && styles.activeTeamText
-                ]}
-              >
-                {roundHistory[index] > 0 ? `+${roundHistory[index]}` :
-                  roundHistory[index] < 0 ? roundHistory[index] : '0'}
-              </Text>
-            </View>
-          ))}
+              <MaterialIcons name="pause" size={24} color="#fff" />
+            </TouchableOpacity>
+          )}
+
+          <View style={styles.timerContainer}>
+            <Animated.View
+              style={[
+                styles.timerBar,
+                {
+                  width: `${(timeLeft / timePerRound) * 100}%`,
+                  backgroundColor: timeLeft > timePerRound * 0.6
+                    ? '#2ecc71' // Yeşil (zamanın %60'ından fazla)
+                    : timeLeft > timePerRound * 0.3
+                      ? '#f39c12' // Sarı (zamanın %30-%60 arası)
+                      : '#e74c3c' // Kırmızı (zamanın %30'undan az)
+                }
+              ]}
+            />
+            <Text style={styles.timerText}>{timeLeft}</Text>
+          </View>
         </View>
       </View>
-    </SafeAreaView>
+
+      {/* Game Board */}
+      <View style={styles.gameBoard}>
+        {isLoadingCards ? (
+          <View style={[styles.cardContainer, styles.loadingContainer]}>
+            <ActivityIndicator size="large" color="#e67e22" />
+            <Text style={styles.loadingText}>{t('general.loading')}</Text>
+          </View>
+        ) : cardsError ? (
+          <View style={[styles.cardContainer, styles.errorContainer]}>
+            <FontAwesome5 name="exclamation-triangle" size={50} color="#e74c3c" />
+            <Text style={styles.errorTitle}>{t('general.error')}</Text>
+            <Text style={styles.errorText}>{cardsError}</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={fetchWords}
+            >
+              <Text style={styles.retryButtonText}>{t('general.retry')}</Text>
+            </TouchableOpacity>
+          </View>
+        ) : isTimerRunning ? (
+          <>
+            {renderCurrentCard()}
+
+            <View style={styles.actionButtons}>
+              <TouchableOpacity
+                style={[styles.actionButton, styles.incorrectButton]}
+                onPress={handleIncorrect}
+              >
+                <Text style={styles.actionButtonText}>{t('game.incorrect')}</Text>
+                <Text style={styles.pointsText}>-1</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  styles.passButton,
+                  passesLeft === 0 && styles.disabledButton
+                ]}
+                onPress={handlePass}
+                disabled={passesLeft === 0}
+              >
+                <Text style={styles.actionButtonText}>{t('game.pass')}</Text>
+                <Text style={styles.passCount}>{passesLeft}</Text>
+              </TouchableOpacity>  
+
+              <TouchableOpacity
+                style={[styles.actionButton, styles.correctButton]}
+                onPress={handleCorrect}
+              >
+                <Text style={styles.actionButtonText}>{t('game.correct')}</Text>
+                <Text style={styles.pointsText}>+1</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          <View style={styles.startRoundContainer}>
+            <Text style={styles.startRoundTitle}>{t('game.nextTeam')}</Text>
+            <Text style={styles.startRoundTeam}>{teams[currentTeamIndex].name}</Text>
+
+            <TouchableOpacity
+              style={styles.startRoundButton}
+              onPress={startRound}
+            >
+              <Text style={styles.startRoundButtonText}>{t('game.startTurn')}</Text>
+              <FontAwesome5 name="play" size={18} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+
+      {/* Team Scores */}
+      <View style={styles.scoresContainer}>
+        {teamRoundScores.map((team: any, index: number) => (
+          <View
+            key={team.id}
+            style={[
+              styles.teamScore,
+              currentTeamIndex === index && styles.activeTeam
+            ]}
+          >
+            <Text
+              style={[
+                styles.teamScoreName,
+                currentTeamIndex === index && styles.activeTeamText
+              ]}
+            >
+              {team.name}
+            </Text>
+            <Text
+              style={[
+                styles.teamScoreValue,
+                currentTeamIndex === index && styles.activeTeamText
+              ]}
+            >
+              {team.totalScore || 0}
+            </Text>
+            <Text
+              style={[
+                styles.teamRoundScore,
+                roundHistory[index] > 0 ? styles.positiveScore : roundHistory[index] < 0 ? styles.negativeScore : {},
+                currentTeamIndex === index && styles.activeTeamText
+              ]}
+            >
+              {roundHistory[index] > 0 ? `+${roundHistory[index]}` :
+                roundHistory[index] < 0 ? roundHistory[index] : '0'}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
   );
 }
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const CARD_HEIGHT = Math.min(SCREEN_HEIGHT * 0.45, 400);
-
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#1e272e',
-  },
   container: {
     flex: 1,
     backgroundColor: '#1e272e',
-    paddingHorizontal: 15,
-    paddingBottom: Platform.select({ ios: 25, android: 15 })
+    padding: 15,
+    paddingBottom: 25
   },
   header: {
     flexDirection: 'row',
@@ -836,7 +782,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 20,
     height: 50,
-    marginTop: Platform.select({ ios: 0, android: 10 })
+    marginTop: 10
   },
   exitButton: {
     padding: 8,
@@ -887,12 +833,11 @@ const styles = StyleSheet.create({
   gameBoard: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingBottom: Platform.select({ ios: 20, android: 10 })
+    justifyContent: 'center',
   },
   cardContainer: {
     width: '100%',
-    height: CARD_HEIGHT,
+    height: '55%',
     backgroundColor: '#fff',
     borderRadius: 15,
     padding: 20,
@@ -903,7 +848,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
     backfaceVisibility: 'hidden',
-    marginBottom: 20
   },
   cardHeader: {
     flexDirection: 'row',
@@ -956,16 +900,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    paddingHorizontal: Platform.select({ ios: 0, android: 5 }),
-    marginTop: 10
+    marginTop: 25,
+    gap: 8,
+    paddingHorizontal: 5,
   },
   actionButton: {
-    flex: 1,
-    marginHorizontal: 5,
-    paddingVertical: Platform.select({ ios: 15, android: 12 }),
+    height: 55,
     borderRadius: 10,
+    paddingHorizontal: 10,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    flex: 1,
   },
   incorrectButton: {
     backgroundColor: '#e74c3c',
